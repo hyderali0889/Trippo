@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "1026243871590",
+    "project_id": "ridewithus-e7ed1",
+    "storage_bucket": "ridewithus-e7ed1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1026243871590:android:4fbac61d2286ba51997ea7",
+        "android_client_info": {
+          "package_name": "dev.hyderali.ridewithus"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1026243871590-qvha9gsb2adhslnu0hseqt11guqv0q6k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxbxTJOfO-sFfSV2tg6DRQj9OqiDnHSek"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1026243871590-qvha9gsb2adhslnu0hseqt11guqv0q6k.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1026243871590-9dmnpidl9ilk55da29mu55tna512chfo.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "dev.hyderali.ridewithus"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1026243871590:android:8883399b5228ee2a997ea7",
+        "android_client_info": {
+          "package_name": "dev.hyderali.trippo_user"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1026243871590-qvha9gsb2adhslnu0hseqt11guqv0q6k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxbxTJOfO-sFfSV2tg6DRQj9OqiDnHSek"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1026243871590-qvha9gsb2adhslnu0hseqt11guqv0q6k.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1026243871590-9dmnpidl9ilk55da29mu55tna512chfo.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "dev.hyderali.ridewithus"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
