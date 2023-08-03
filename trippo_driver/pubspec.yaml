@@ -43,6 +43,7 @@ dependencies:
   google_maps_flutter: ^2.3.1
   google_map_polyline_new: ^0.3.0+2
   firebase_core: ^2.15.0
+  elegant_notification: ^1.10.1
 
 dev_dependencies:
   flutter_test:
@@ -69,8 +70,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - assets/imgs/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -84,12 +85,23 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
+  fonts:
+    - family: bold
+      fonts:
+        - asset: assets/fonts/Bold.ttf
+    - family: light
+      fonts:
+        - asset: assets/fonts/Light.ttf
+    - family: medium
+      fonts:
+        - asset: assets/fonts/Medium.ttf
+    - family: regular
+      fonts:
+        - asset: assets/fonts/Regular.ttf
+    - family: semiBold
+      fonts:
+        - asset: assets/fonts/SemiBold.ttf
+
   #   - family: Trajan Pro
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf
