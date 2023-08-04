@@ -29,10 +29,6 @@ final addressProvider = StateProvider<String?>((ref) {
   return null;
 });
 
-final directionPolylinesProvider =
-    StateProvider<DirectionPolylineDetails?>((ref) {
-  return null;
-});
 
 final mainPolylinesProvider = StateProvider<Set<Polyline>>((ref) {
   return {};
