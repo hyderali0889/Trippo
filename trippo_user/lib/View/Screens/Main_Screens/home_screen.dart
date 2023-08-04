@@ -12,7 +12,6 @@ import 'package:trippo_user/Container/utils/keys.dart';
 import '../../../Container/Repositories/direction_polylines_repo.dart';
 import '../../../Container/utils/set_blackmap.dart';
 import '../../../Model/direction_model.dart';
-import '../../../Model/direction_polyline_details_model.dart';
 import '../../Routes/routes.dart';
 
 final cameraMovementProvider = StateProvider<LatLng?>((ref) {

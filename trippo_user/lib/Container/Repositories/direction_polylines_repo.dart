@@ -37,7 +37,7 @@ class DirectionPolylines {
           durationValue: res.data["routes"][0]["legs"][0]["duration"]["value"],
         );
 
-        ref.read(directionPolylinesProvider.notifier).update((state) => model);
+
         return model;
       } else {
         ElegantNotification.error(description: const Text("Failed to get data"))
@@ -86,7 +86,7 @@ class DirectionPolylines {
           .read(mainPolylinesProvider.notifier)
           .update((Set<Polyline> state) => {...state, newPolyline});
 
-      print("new plist is $pLinesCoordinatedList");
+      
 
       LatLngBounds bounds;
 
