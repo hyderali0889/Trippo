@@ -7,12 +7,19 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:trippo_user/Container/utils/keys.dart';
 import 'package:trippo_user/Model/direction_polyline_details_model.dart';
 import 'package:trippo_user/View/Screens/Main_Screens/home_screen.dart';
+/// [directionPolylinesRepoProvider] used to cache the [DirectionPolylines] class to prevent it from creating multiple instances
+
 
 final directionPolylinesRepoProvider = Provider<DirectionPolylines>((ref) {
   return DirectionPolylines();
 });
 
 class DirectionPolylines {
+
+  /// [getDirectionsPolylines] function takes the [pickUpDestination] and  the [dropOffDestination] from the user and fetches the direction data from google maps api
+  /// and returns the response in form of [DirectionPolylineDetails]
+
+
   Future<dynamic> getDirectionsPolylines(
       context, WidgetRef ref, controller) async {
     try {
@@ -52,6 +59,11 @@ class DirectionPolylines {
 
   List<LatLng> pLinesCoordinatedList = [];
 
+  /// [setNewDirectionPolylines] function takes the [DirectionPolylineDetails] model from the [getDirectionsPolylines] function
+  ///  and adds the decoded polylines data to [pLinesCoordinatedList] and creates a new [polyline] variable and alots the var to [mainPolylinesProvider] located in the [HomeScreen]
+  /// and creates LatLng [Bounds] which would animates the [GoogleMapsController] controller to the new position with polylines on [map] and with 65 [padding]
+
+
   void setNewDirectionPolylines(ref, context, controller) async {
     try {
       DirectionPolylineDetails model =
@@ -86,7 +98,7 @@ class DirectionPolylines {
           .read(mainPolylinesProvider.notifier)
           .update((Set<Polyline> state) => {...state, newPolyline});
 
-      
+
 
       LatLngBounds bounds;
 

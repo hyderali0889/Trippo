@@ -7,9 +7,14 @@ import 'package:trippo_user/Container/utils/keys.dart';
 import 'package:trippo_user/View/Screens/Main_Screens/home_screen.dart';
 import '../../Model/direction_model.dart';
 
+/// [addressParserProvider] used to cache the [AddressParser] class to prevent it from creating multiple instances
+
 final addressParserProvider = Provider<AddressParser>((ref) {
   return AddressParser();
 });
+
+/// This [AddressParser] has function [humanReadableAddress] which creates address that is in a readable form
+/// from the provided [userPosition]'s latitude and longitude and returns response in form of [DIrection] model.
 
 class AddressParser {
   dynamic humanReadableAddress(

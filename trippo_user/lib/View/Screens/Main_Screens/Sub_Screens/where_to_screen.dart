@@ -140,6 +140,9 @@ class _WhereToScreenState extends State<WhereToScreen> {
     );
   }
 
+  /// user gets the [String] human readable address from the selected item from the [ListView] and the new data is
+  /// shown on the screen as user types anything new in the text fiels
+
   void setDropOffLocation(WidgetRef ref, int index) async {
     try {
       await ref.read(placeDetailsRepoProvider).getAllPredictedPlaceDetails(

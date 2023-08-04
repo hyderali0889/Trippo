@@ -7,12 +7,18 @@ import 'package:trippo_user/Container/utils/keys.dart';
 import 'package:trippo_user/View/Screens/Main_Screens/home_screen.dart';
 import '../../Model/direction_model.dart';
 import '../../View/Screens/Main_Screens/Sub_Screens/where_to_screen.dart';
+/// [placeDetailsRepoProvider] used to cache the [PlaceDetailsRepo] class to prevent it from creating multiple instances
 
 final placeDetailsRepoProvider = Provider<PlaceDetailsRepo>((ref) {
   return PlaceDetailsRepo();
 });
 
 class PlaceDetailsRepo {
+
+ /// [getAllPredictedPlaceDetails] gets the details of the location by getting location ID from [placeId] and fetching the
+ /// data related to this [placeId] when user Clicks on any item inside of the [ListView] in the [WhereTo] screen and return a [Direction] model which directing user back to [HomeScreen]
+
+
   Future<dynamic> getAllPredictedPlaceDetails(
       String placeId, BuildContext context, WidgetRef ref, controller) async {
     try {
@@ -36,8 +42,6 @@ class PlaceDetailsRepo {
             .update((state) => placeDetails);
 
         ref.read(whereToLoadingProvider.notifier).update((state) => false);
-
-
 
 
           if (context.mounted) {

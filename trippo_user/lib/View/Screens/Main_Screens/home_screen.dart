@@ -233,6 +233,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   // end of body
 
+  /// [checkPermissions] checking the permission status
+
   void checkPermissions() async {
     try {
       LocationPermission permission = await Geolocator.checkPermission();
@@ -250,6 +252,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           .show(context);
     }
   }
+
+  /// [getUserLoc] fetches a the users location as soon as user start the app
 
   void getUserLoc() async {
     try {
@@ -269,6 +273,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           .show(context);
     }
   }
+
+  /// [getAddressfromCordinates] read data from [cameraMovementProvider] (which is updated whenever the camera moves) and gets the human readable address
+  /// from the [cameraMovementProvider] and returns a [Direction] model which is assigned to [pickUpLocationProvider] (which sets the user's pick up Location)
 
   void getAddressfromCordinates() async {
     try {

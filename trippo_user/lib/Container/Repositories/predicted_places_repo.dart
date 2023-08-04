@@ -6,12 +6,18 @@ import 'package:trippo_user/Container/utils/keys.dart';
 import 'package:trippo_user/Model/predicted_places.dart';
 
 import '../../View/Screens/Main_Screens/Sub_Screens/where_to_screen.dart';
+/// [predictedPlacesRepoProvider] used to cache the [PredictedPlacesRepo] class to prevent it from creating multiple instances
 
 final predictedPlacesRepoProvider = Provider<PredictedPlacesRepo>((ref) {
   return PredictedPlacesRepo();
 });
 
 class PredictedPlacesRepo {
+
+  /// [getAllPredictedPlaces] gets the details of the location by getting the string from [text] and fetching the
+ /// data related to this [text] and showing them inside the [WhereTo] screen as user adds types more words new [autoComplete] items are added to the
+ /// [ListView] in the [WhereTo] screen by adding the newly created list of [predictedPlacesList] to the provider [predictedPlacesProvider] located in the [WhereTo] Screen
+
   void getAllPredictedPlaces(
       String text, BuildContext context, WidgetRef ref) async {
     try {
