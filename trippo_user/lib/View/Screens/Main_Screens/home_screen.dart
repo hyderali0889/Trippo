@@ -28,7 +28,6 @@ final addressProvider = StateProvider<String?>((ref) {
   return null;
 });
 
-
 final mainPolylinesProvider = StateProvider<Set<Polyline>>((ref) {
   return {};
 });
@@ -67,6 +66,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.sizeOf(context);
 
+
     return Scaffold(
       body: SafeArea(
           child: SizedBox(
@@ -104,18 +104,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       getAddressfromCordinates();
                     },
                   ),
-                  const Align(
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.location_on,
-                      size: 50,
-                      color: Colors.white,
-                    ),
-                  ),
+                  ref.watch(dropOffLocationProvider) != null
+                      ? Container()
+                      : const Align(
+                          alignment: Alignment.center,
+                          child: Icon(
+                            Icons.location_on,
+                            size: 50,
+                            color: Colors.white,
+                          ),
+                        ),
                   Positioned(
                     bottom: 0,
                     child: Container(
-                      height: 250,
+                      height: 300,
                       width: size.width,
                       decoration: const BoxDecoration(
                           color: Colors.black,
@@ -180,14 +182,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 ),
                               ),
                               InkWell(
-                                onTap: () async {
-                                  context.pushNamed(Routes().whereTo,
-                                      extra: controller).then((value){
-                                            ref
-              .watch(directionPolylinesRepoProvider)
-              .setNewDirectionPolylines(ref, context, controller);
-                                      });
-                                },
+                                onTap: () => openWhereToScreen(),
                                 child: Container(
                                   width: size.width * 0.9,
                                   padding: const EdgeInsets.all(10),
@@ -222,6 +217,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   ),
                                 ),
                               ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 20.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        ref
+                                            .watch(dropOffLocationProvider
+                                                .notifier)
+                                            .update((state) => null);
+                                      },
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        height: 50,
+                                        width: size.width * 0.4,
+                                        decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(14.0),
+                                            color: Colors.blue),
+                                        child: const Text(
+                                            "Change Pickup Location"),
+                                      ),
+                                    ),
+                                    InkWell(
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        height: 50,
+                                        width: size.width * 0.4,
+                                        decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(14.0),
+                                            color: Colors.orange),
+                                        child:
+                                            const Text("Request a Ride"),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
                             ]),
                       ),
                     ),
@@ -248,8 +285,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return;
       }
     } catch (e) {
-      ElegantNotification.error(description: Text("An Error Occurred 3 $e"))
-          .show(context);
+      ElegantNotification.error(
+          description: Text(
+        "An Error Occurred $e",
+        style: const TextStyle(color: Colors.black),
+      )).show(context);
     }
   }
 
@@ -269,8 +309,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             .humanReadableAddress(pos, context, ref);
       }
     } catch (e) {
-      ElegantNotification.error(description: Text("An Error Occurred 1 $e"))
-          .show(context);
+      ElegantNotification.error(
+          description: Text(
+        "An Error Occurred $e",
+        style: const TextStyle(color: Colors.black),
+      )).show(context);
     }
   }
 
@@ -295,8 +338,86 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
       ref.read(pickUpLocationProvider.notifier).update((state) => model);
     } catch (e) {
-      ElegantNotification.error(description: Text("An Error Occurred $e"))
-          .show(context);
+      ElegantNotification.error(
+          description: Text(
+        "An Error Occurred $e",
+        style: const TextStyle(color: Colors.black),
+      )).show(context);
+    }
+  }
+
+  /// Function for [WhereTo] TextField Button
+
+  void openWhereToScreen() async {
+    try {
+      await context.pushNamed(Routes().whereTo, extra: controller);
+
+      if (ref.watch(dropOffLocationProvider)!.locationLatitude == null) {
+        return;
+      }
+
+      if (context.mounted) {
+        /// Making [Markers] for [pickUp] and [dropOff] Places
+        Marker pickUpMarker = Marker(
+            markerId: const MarkerId("pickUpId"),
+            infoWindow: InfoWindow(
+              title: ref.watch(pickUpLocationProvider)!.locationName,
+            ),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+                BitmapDescriptor.hueGreen),
+            position: LatLng(
+                ref.watch(pickUpLocationProvider)!.locationLatitude!,
+                ref.watch(pickUpLocationProvider)!.locationLongitude!));
+        Marker dropOffMarker = Marker(
+            markerId: const MarkerId("dropOffId"),
+            infoWindow: InfoWindow(
+              title: ref.watch(dropOffLocationProvider)!.locationName,
+            ),
+            icon:
+                BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+            position: LatLng(
+                ref.watch(dropOffLocationProvider)!.locationLatitude!,
+                ref.watch(dropOffLocationProvider)!.locationLongitude!));
+
+        /// Making [Circle] for [pickUp] and [dropOff] Places
+
+        Circle pickUpCircle = Circle(
+            circleId: const CircleId("pickUpCircle"),
+            fillColor: Colors.green,
+            radius: 500,
+            strokeColor: Colors.black,
+            center: LatLng(ref.watch(pickUpLocationProvider)!.locationLatitude!,
+                ref.watch(pickUpLocationProvider)!.locationLongitude!));
+        Circle dropOffCircle = Circle(
+            circleId: const CircleId("dropOffCircle"),
+            fillColor: Colors.red,
+            radius: 500,
+            strokeColor: Colors.black,
+            center: LatLng(
+                ref.watch(dropOffLocationProvider)!.locationLatitude!,
+                ref.watch(dropOffLocationProvider)!.locationLongitude!));
+
+        /// Calling function to draw [Polylines]
+        ref
+            .watch(directionPolylinesRepoProvider)
+            .setNewDirectionPolylines(ref, context, controller);
+
+        /// Adding [Markers] to [pickUp] and [dropOff] Places
+        ref
+            .watch(mainMarkersProvider.notifier)
+            .update((state) => {...state, pickUpMarker, dropOffMarker});
+
+        /// Adding [Circles] to [pickUp] and [dropOff] Places
+        ref
+            .watch(mainCirclesProvider.notifier)
+            .update((state) => {...state, pickUpCircle, dropOffCircle});
+      }
+    } catch (e) {
+      ElegantNotification.error(
+          description: Text(
+        "An Error Occurred $e",
+        style: const TextStyle(color: Colors.black),
+      )).show(context);
     }
   }
 }

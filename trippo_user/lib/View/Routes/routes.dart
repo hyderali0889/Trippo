@@ -3,7 +3,7 @@ class Routes {
   final String splash = "splash";
 
   //Navgation
-  final String navigation = "navigation";
+  final String home = "home";
 
   // Auth Routes
 

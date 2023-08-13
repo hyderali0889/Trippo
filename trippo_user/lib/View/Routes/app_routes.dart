@@ -5,8 +5,8 @@ import 'package:trippo_user/View/Routes/routes.dart';
 import 'package:trippo_user/View/Screens/Auth_Screens/login_screen.dart';
 import 'package:trippo_user/View/Screens/Auth_Screens/register_screen.dart';
 import 'package:trippo_user/View/Screens/Main_Screens/Sub_Screens/where_to_screen.dart';
+import 'package:trippo_user/View/Screens/Main_Screens/home_screen.dart';
 import 'package:trippo_user/View/Screens/Other_Screens/splash_screen.dart';
-import '../Screens/Navigation/nav_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -50,17 +50,16 @@ final List<RouteBase> allRoutes =[
         return const RegisterScreen();
       },
     ),
+    GoRoute(
+      name: Routes().home,
+      path: '/${Routes().home}',
+      builder: (BuildContext context, GoRouterState state) {
+        return const HomeScreen();
+      },
+    ),
 
     // Main Routes
 
-    GoRoute(
-
-      name: Routes().navigation,
-      path: '/${Routes().navigation}',
-      builder: (BuildContext context, GoRouterState state) {
-        return const NavigationScreen();
-      },
-    ),
 
   // Main Sub Routes
  GoRoute(

@@ -129,7 +129,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                                                 if (context.mounted) {
                                                   context.goNamed(
-                                                      Routes().navigation);
+                                                      Routes().home);
                                                 }
                                               } catch (e) {
                                                 ref

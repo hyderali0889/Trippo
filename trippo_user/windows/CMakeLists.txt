@@ -4,7 +4,7 @@ project(trippo_user LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
-set(BINARY_NAME "trippo_user")
+set(BINARY_NAME "Trippo")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
