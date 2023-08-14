@@ -14,24 +14,24 @@ class Components {
           hintStyle: Theme.of(context)
               .textTheme
               .bodySmall!
-              .copyWith(fontSize: 14, color: Colors.white30),
+              .copyWith(fontSize: 14, color: Colors.white),
           enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: Colors.deepPurple, width: 1)),
+              borderSide: const BorderSide(color: Colors.red, width: 1)),
           focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide:
-                  const BorderSide(color: Colors.deepPurple, width: 1))),
+              borderSide: const BorderSide(color: Colors.red, width: 1))),
     );
   }
 
-  Container mainButton(Size size, String title, BuildContext context ,Color color ) {
+  Container mainButton(
+      Size size, String title, BuildContext context, Color color) {
     return Container(
       alignment: Alignment.center,
       width: size.width * 0.8,
       height: 40,
-      decoration: BoxDecoration(
-          color: color, borderRadius: BorderRadius.circular(14)),
+      decoration:
+          BoxDecoration(color: color, borderRadius: BorderRadius.circular(14)),
       child: Text(
         title,
         style: Theme.of(context).textTheme.bodySmall,

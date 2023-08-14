@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'View/Routes/app_routes.dart';
 import 'View/Themes/app_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
 
+import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'Trippo (Driver)',
+      title: 'Trippo',
       theme: appTheme,
       routerConfig: router,
     );

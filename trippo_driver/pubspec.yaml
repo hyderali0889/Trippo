@@ -41,9 +41,12 @@ dependencies:
   flutter_riverpod: ^2.3.6
   geolocator: ^9.0.2
   google_maps_flutter: ^2.3.1
-  google_map_polyline_new: ^0.3.0+2
   firebase_core: ^2.15.0
   elegant_notification: ^1.10.1
+  dio: ^4.0.6
+  location: ^5.0.1
+  geocoder2: ^1.4.0
+  flutter_polyline_points: ^1.0.0
 
 dev_dependencies:
   flutter_test:

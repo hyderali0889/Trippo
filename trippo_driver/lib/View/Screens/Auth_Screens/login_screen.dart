@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:trippo_driver/Container/Repositories/auth_repo.dart';
 import 'package:trippo_driver/View/Components/all_components.dart';
+
 import '../../Routes/routes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -78,9 +79,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                   "Enter Password"),
                             ),
                             Padding(
-                              padding: const EdgeInsets.only(top: 20.0),
-                              child: Consumer(
-                                builder: (context, ref, child) {
+                                padding: const EdgeInsets.only(top: 20.0),
+                                child: Consumer(builder: (context, ref, child) {
                                   return InkWell(
                                       onTap: ref.watch(isLoadingProvider)
                                           ? null
@@ -101,7 +101,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                                     .watch(isLoadingProvider
                                                         .notifier)
                                                     .update((state) => true);
-
                                                 ref
                                                     .watch(authRepoProvider)
                                                     .loginUser(
@@ -111,8 +110,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                                             .trim(),
                                                         context);
 
-
-
                                                 ref
                                                     .watch(isLoadingProvider
                                                         .notifier)
@@ -120,7 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                                 if (context.mounted) {
                                                   context.goNamed(
-                                                      Routes().navigation);
+                                                      Routes().home);
                                                 }
                                               } catch (e) {
                                                 ref
@@ -142,9 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           ref.watch(isLoadingProvider)
                                               ? Colors.grey
                                               : Colors.blue));
-                                },
-                              ),
-                            ),
+                                })),
                             TextButton(
                                 onPressed: () {
                                   context.goNamed(Routes().register);

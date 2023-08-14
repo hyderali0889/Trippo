@@ -20,9 +20,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
-
-
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.sizeOf(context);
@@ -111,21 +108,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                                       .show(context);
                                                   return;
                                                 }
+
                                                 ref
                                                     .watch(isLoadingProvider
                                                         .notifier)
                                                     .update((state) => true);
-
                                                 ref
                                                     .watch(authRepoProvider)
                                                     .registerUser(
-                                                      nameController.text.trim(),
                                                         emailController.text
                                                             .trim(),
                                                         passwordController.text
                                                             .trim(),
-                                                        context , ref);
+                                                        context);
 
+                                                ref
+                                                    .watch(isLoadingProvider
+                                                        .notifier)
+                                                    .update((state) => false);
+
+                                                if (context.mounted) {
+                                                  context.goNamed(
+                                                      Routes().driverConfig);
+                                                }
                                               } catch (e) {
                                                 ref
                                                     .watch(isLoadingProvider

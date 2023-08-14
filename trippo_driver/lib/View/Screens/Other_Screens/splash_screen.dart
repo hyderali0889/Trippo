@@ -21,12 +21,7 @@ class _SplashScreenState extends State<SplashScreen> {
     initializeUser();
   }
 
-  // void goHome() async {
-  //   await Future.delayed(const Duration(seconds: 4));
-  //   if (context.mounted) {
-  //     context.goNamed(Routes().login);
-  //   }
-  // }
+
 
   void initializeUser() async {
 
@@ -36,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
       Timer(
         const Duration(seconds: 3),
         () {
-          context.goNamed(Routes().navigation);
+          context.goNamed(Routes().home);
         },
       );
     } else {

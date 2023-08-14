@@ -3,12 +3,14 @@ class Routes {
   final String splash = "splash";
 
   //Navgation
-  final String navigation = "navigation";
-
+  final String home = "home";
 
   // Auth Routes
 
   final String login = "login";
   final String register = "register";
-  final String driverConfigs= "driverConfigs";
+  final String driverConfig = "driverConfig";
+
+  // Main Sub Routes
+  final String whereTo = "whereTo";
 }

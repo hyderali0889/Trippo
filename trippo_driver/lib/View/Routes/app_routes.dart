@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:trippo_driver/View/Routes/routes.dart';
-import 'package:trippo_driver/View/Screens/Auth_Screens/driver_config.dart';
 import 'package:trippo_driver/View/Screens/Auth_Screens/login_screen.dart';
 import 'package:trippo_driver/View/Screens/Auth_Screens/register_screen.dart';
+import 'package:trippo_driver/View/Screens/Main_Screens/Sub_Screens/where_to_screen.dart';
+import 'package:trippo_driver/View/Screens/Main_Screens/home_screen.dart';
 import 'package:trippo_driver/View/Screens/Other_Screens/splash_screen.dart';
-import '../Screens/Navigation/nav_screen.dart';
+
+import '../Screens/Auth_Screens/driver_config.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -15,10 +18,17 @@ final GlobalKey<NavigatorState> _rootNavigatorKey =
 final GoRouter router = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: '/${Routes().splash}',
-  debugLogDiagnostics: true,
 
-  
-  routes: <RouteBase>[
+
+
+  routes:allRoutes
+);
+
+
+final List<RouteBase> allRoutes =[
+
+  // Other Screen Routes
+
     GoRoute(
       name: Routes().splash,
       path: '/${Routes().splash}',
@@ -26,6 +36,8 @@ final GoRouter router = GoRouter(
         return const SplashScreen();
       },
     ),
+
+    // Auth Routes
     GoRoute(
       name: Routes().login,
       path: '/${Routes().login}',
@@ -41,24 +53,35 @@ final GoRouter router = GoRouter(
       },
     ),
     GoRoute(
-      name: Routes().driverConfigs,
-      path: '/${Routes().driverConfigs}',
+      name: Routes().driverConfig,
+      path: '/${Routes().driverConfig}',
       builder: (BuildContext context, GoRouterState state) {
         return const DriverConfigsScreen();
       },
     ),
-
     GoRoute(
-
-      name: Routes().navigation,
-      path: '/${Routes().navigation}',
+      name: Routes().home,
+      path: '/${Routes().home}',
       builder: (BuildContext context, GoRouterState state) {
-        return const NavigationScreen(
-
-        );
+        return const HomeScreen();
       },
     ),
 
-  ],
-);
+    // Main Routes
+
+
+  // Main Sub Routes
+ GoRoute(
+
+      name: Routes().whereTo,
+      path: '/${Routes().whereTo}',
+
+      builder: (BuildContext context, GoRouterState state) {
+
+        return  WhereToScreen( controller:state.extra as GoogleMapController ,);
+      },
+    ),
+
+
+  ];
 
