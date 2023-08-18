@@ -127,10 +127,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                                         .notifier)
                                                     .update((state) => false);
 
-                                                if (context.mounted) {
-                                                  context.goNamed(
-                                                      Routes().home);
-                                                }
+                                               
                                               } catch (e) {
                                                 ref
                                                     .watch(isLoadingProvider

@@ -115,10 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                                         .notifier)
                                                     .update((state) => false);
 
-                                                if (context.mounted) {
-                                                  context.goNamed(
-                                                      Routes().home);
-                                                }
+                                               
                                               } catch (e) {
                                                 ref
                                                     .watch(isLoadingProvider

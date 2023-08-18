@@ -117,7 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                                 if (context.mounted) {
                                                   context.goNamed(
-                                                      Routes().home);
+                                                      Routes().navigationScreen);
                                                 }
                                               } catch (e) {
                                                 ref

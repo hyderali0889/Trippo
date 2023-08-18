@@ -3,7 +3,7 @@ class Routes {
   final String splash = "splash";
 
   //Navgation
-  final String home = "home";
+  final String navigationScreen = "navigationScreen";
 
   // Auth Routes
 
@@ -11,6 +11,4 @@ class Routes {
   final String register = "register";
   final String driverConfig = "driverConfig";
 
-  // Main Sub Routes
-  final String whereTo = "whereTo";
 }

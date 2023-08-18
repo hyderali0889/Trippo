@@ -1,146 +1,140 @@
-import 'package:dio/dio.dart';
-import 'package:elegant_notification/elegant_notification.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:trippo_driver/Container/utils/keys.dart';
-import 'package:trippo_driver/Model/direction_polyline_details_model.dart';
-import 'package:trippo_driver/View/Screens/Main_Screens/home_screen.dart';
-/// [directionPolylinesRepoProvider] used to cache the [DirectionPolylines] class to prevent it from creating multiple instances
+// import 'package:dio/dio.dart';
+// import 'package:elegant_notification/elegant_notification.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:google_maps_flutter/google_maps_flutter.dart';
+// import 'package:trippo_driver/Container/utils/keys.dart';
+// import 'package:trippo_driver/Model/direction_polyline_details_model.dart';
+// import 'package:trippo_driver/View/Screens/Main_Screens/home_screen.dart';
 
+// /// [directionPolylinesRepoProvider] used to cache the [DirectionPolylines] class to prevent it from creating multiple instances
 
-final directionPolylinesRepoProvider = Provider<DirectionPolylines>((ref) {
-  return DirectionPolylines();
-});
+// final directionPolylinesRepoProvider = Provider<DirectionPolylines>((ref) {
+//   return DirectionPolylines();
+// });
 
-class DirectionPolylines {
+// class DirectionPolylines {
+//   /// [getDirectionsPolylines] function takes the [pickUpDestination] and  the [dropOffDestination] from the user and fetches the direction data from google maps api
+//   /// and returns the response in form of [DirectionPolylineDetails]
 
-  /// [getDirectionsPolylines] function takes the [pickUpDestination] and  the [dropOffDestination] from the user and fetches the direction data from google maps api
-  /// and returns the response in form of [DirectionPolylineDetails]
+//   Future<dynamic> getDirectionsPolylines(
+//       context, WidgetRef ref, controller) async {
+//     try {
+//       LatLng pickUpDestination = LatLng(
+//           ref.read(driversLocationProvider)!.locationLatitude!,
+//           ref.read(driversLocationProvider)!.locationLongitude!);
+//       LatLng dropOffDestination = LatLng(
+//           ref.read(dropOffLocationProvider)!.locationLatitude!,
+//           ref.read(dropOffLocationProvider)!.locationLongitude!);
 
+//       String url =
+//           "https://maps.googleapis.com/maps/api/directions/json?origin=${pickUpDestination.latitude},${pickUpDestination.longitude}&destination=${dropOffDestination.latitude},${dropOffDestination.longitude}&key=$mapKey";
 
-  Future<dynamic> getDirectionsPolylines(
-      context, WidgetRef ref, controller) async {
-    try {
-      LatLng pickUpDestination = LatLng(
-          ref.read(pickUpLocationProvider)!.locationLatitude!,
-          ref.read(pickUpLocationProvider)!.locationLongitude!);
-      LatLng dropOffDestination = LatLng(
-          ref.read(dropOffLocationProvider)!.locationLatitude!,
-          ref.read(dropOffLocationProvider)!.locationLongitude!);
+//       Response res = await Dio().get(url);
 
-      String url =
-          "https://maps.googleapis.com/maps/api/directions/json?origin=${pickUpDestination.latitude},${pickUpDestination.longitude}&destination=${dropOffDestination.latitude},${dropOffDestination.longitude}&key=$mapKey";
+//       if (res.statusCode == 200) {
+//         DirectionPolylineDetails model = DirectionPolylineDetails(
+//           epoints: res.data["routes"][0]["overview_polyline"]["points"],
+//           distanceText: res.data["routes"][0]["legs"][0]["distance"]["text"],
+//           distanceValue: res.data["routes"][0]["legs"][0]["distance"]["value"],
+//           durationText: res.data["routes"][0]["legs"][0]["duration"]["text"],
+//           durationValue: res.data["routes"][0]["legs"][0]["duration"]["value"],
+//         );
 
-      Response res = await Dio().get(url);
+//         return model;
+//       } else {
+//         ElegantNotification.error(description: const Text("Failed to get data"))
+//             .show(context);
+//       }
+//     } catch (e) {
+//       print("error data is $e");
+//       ElegantNotification.error(description: Text("An Error Occurred $e"))
+//           .show(context);
+//     }
+//   }
 
-      if (res.statusCode == 200) {
-        DirectionPolylineDetails model = DirectionPolylineDetails(
-          epoints: res.data["routes"][0]["overview_polyline"]["points"],
-          distanceText: res.data["routes"][0]["legs"][0]["distance"]["text"],
-          distanceValue: res.data["routes"][0]["legs"][0]["distance"]["value"],
-          durationText: res.data["routes"][0]["legs"][0]["duration"]["text"],
-          durationValue: res.data["routes"][0]["legs"][0]["duration"]["value"],
-        );
+//   List<LatLng> pLinesCoordinatedList = [];
 
+//   /// [setNewDirectionPolylines] function takes the [DirectionPolylineDetails] model from the [getDirectionsPolylines] function
+//   ///  and adds the decoded polylines data to [pLinesCoordinatedList] and creates a new [polyline] variable and alots the var to [mainPolylinesProvider] located in the [HomeScreen]
+//   /// and creates LatLng [Bounds] which would animates the [GoogleMapsController] controller to the new position with polylines on [map] and with 65 [padding]
 
-        return model;
-      } else {
-        ElegantNotification.error(description: const Text("Failed to get data"))
-            .show(context);
-      }
-    } catch (e) {
-      print("error data is $e");
-      ElegantNotification.error(description: Text("An Error Occurred $e"))
-          .show(context);
-    }
-  }
+//   void setNewDirectionPolylines(ref, context, controller) async {
+//     try {
+//       DirectionPolylineDetails model =
+//           await getDirectionsPolylines(context, ref, controller);
 
-  List<LatLng> pLinesCoordinatedList = [];
+//       PolylinePoints points = PolylinePoints();
+//       List<PointLatLng> decodedPolylines =
+//           points.decodePolyline(model.epoints!);
 
-  /// [setNewDirectionPolylines] function takes the [DirectionPolylineDetails] model from the [getDirectionsPolylines] function
-  ///  and adds the decoded polylines data to [pLinesCoordinatedList] and creates a new [polyline] variable and alots the var to [mainPolylinesProvider] located in the [HomeScreen]
-  /// and creates LatLng [Bounds] which would animates the [GoogleMapsController] controller to the new position with polylines on [map] and with 65 [padding]
+//       pLinesCoordinatedList.clear();
 
+//       if (decodedPolylines.isNotEmpty) {
+//         for (PointLatLng polyline in decodedPolylines) {
+//           pLinesCoordinatedList
+//               .add(LatLng(polyline.latitude, polyline.longitude));
+//         }
+//       }
 
-  void setNewDirectionPolylines(ref, context, controller) async {
-    try {
-      DirectionPolylineDetails model =
-          await getDirectionsPolylines(context, ref, controller);
+//       ref.read(mainPolylinesProvider).clear();
 
-      PolylinePoints points = PolylinePoints();
-      List<PointLatLng> decodedPolylines =
-          points.decodePolyline(model.epoints!);
+//       Polyline newPolyline = Polyline(
+//           color: Colors.blue,
+//           polylineId: const PolylineId("polylineId"),
+//           jointType: JointType.round,
+//           points: pLinesCoordinatedList,
+//           startCap: Cap.roundCap,
+//           endCap: Cap.roundCap,
+//           geodesic: true,
+//           width: 5);
 
-      pLinesCoordinatedList.clear();
+//       ref
+//           .read(mainPolylinesProvider.notifier)
+//           .update((Set<Polyline> state) => {...state, newPolyline});
 
-      if (decodedPolylines.isNotEmpty) {
-        for (PointLatLng polyline in decodedPolylines) {
-          pLinesCoordinatedList
-              .add(LatLng(polyline.latitude, polyline.longitude));
-        }
-      }
+//       LatLngBounds bounds;
 
-      ref.read(mainPolylinesProvider).clear();
+//       if (ref.read(driversLocationProvider)!.locationLatitude! >
+//               ref.read(dropOffLocationProvider)!.locationLatitude! &&
+//           ref.read(driversLocationProvider)!.locationLongitude! >
+//               ref.read(dropOffLocationProvider)!.locationLongitude!) {
+//         bounds = LatLngBounds(
+//             southwest: LatLng(
+//                 ref.read(driversLocationProvider)!.locationLatitude!,
+//                 ref.read(dropOffLocationProvider)!.locationLongitude!),
+//             northeast: LatLng(
+//                 ref.read(dropOffLocationProvider)!.locationLatitude!,
+//                 ref.read(driversLocationProvider)!.locationLongitude!));
+//       } else if (ref.read(driversLocationProvider)!.locationLatitude! >
+//           ref.read(dropOffLocationProvider)!.locationLatitude!) {
+//         bounds = LatLngBounds(
+//             southwest: LatLng(
+//                 ref.read(dropOffLocationProvider)!.locationLatitude!,
+//                 ref.read(driversLocationProvider)!.locationLongitude!),
+//             northeast: LatLng(
+//                 ref.read(driversLocationProvider)!.locationLatitude!,
+//                 ref.read(dropOffLocationProvider)!.locationLongitude!));
+//       } else {
+//         bounds = LatLngBounds(
+//             southwest: LatLng(
+//                 ref.read(driversLocationProvider)!.locationLatitude!,
+//                 ref.read(driversLocationProvider)!.locationLongitude!),
+//             northeast: LatLng(
+//                 ref.read(dropOffLocationProvider)!.locationLatitude!,
+//                 ref.read(dropOffLocationProvider)!.locationLongitude!));
 
-      Polyline newPolyline = Polyline(
-          color: Colors.blue,
-          polylineId: const PolylineId("polylineId"),
-          jointType: JointType.round,
-          points: pLinesCoordinatedList,
-          startCap: Cap.roundCap,
-          endCap: Cap.roundCap,
-          geodesic: true,
-          width: 5);
+//         controller!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 65));
+//       }
+//     } catch (e) {
+//       ElegantNotification.error(
+//           description: Text(
+//         "An Error Occurred $e",
+//         style: const TextStyle(color: Colors.black),
+//       )).show(context);
 
-      ref
-          .read(mainPolylinesProvider.notifier)
-          .update((Set<Polyline> state) => {...state, newPolyline});
-
-
-
-      LatLngBounds bounds;
-
-      if (ref.read(pickUpLocationProvider)!.locationLatitude! >
-              ref.read(dropOffLocationProvider)!.locationLatitude! &&
-          ref.read(pickUpLocationProvider)!.locationLongitude! >
-              ref.read(dropOffLocationProvider)!.locationLongitude!) {
-        bounds = LatLngBounds(
-            southwest: LatLng(
-                ref.read(pickUpLocationProvider)!.locationLatitude!,
-                ref.read(dropOffLocationProvider)!.locationLongitude!),
-            northeast: LatLng(
-                ref.read(dropOffLocationProvider)!.locationLatitude!,
-                ref.read(pickUpLocationProvider)!.locationLongitude!));
-      } else if (ref.read(pickUpLocationProvider)!.locationLatitude! >
-          ref.read(dropOffLocationProvider)!.locationLatitude!) {
-        bounds = LatLngBounds(
-            southwest: LatLng(
-                ref.read(dropOffLocationProvider)!.locationLatitude!,
-                ref.read(pickUpLocationProvider)!.locationLongitude!),
-            northeast: LatLng(
-                ref.read(pickUpLocationProvider)!.locationLatitude!,
-                ref.read(dropOffLocationProvider)!.locationLongitude!));
-      } else {
-        bounds = LatLngBounds(
-            southwest: LatLng(
-                ref.read(pickUpLocationProvider)!.locationLatitude!,
-                ref.read(pickUpLocationProvider)!.locationLongitude!),
-            northeast: LatLng(
-                ref.read(dropOffLocationProvider)!.locationLatitude!,
-                ref.read(dropOffLocationProvider)!.locationLongitude!));
-
-        controller!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 65));
-      }
-    } catch (e) {
-      ElegantNotification.error(
-          description: Text(
-        "An Error Occurred $e",
-        style: const TextStyle(color: Colors.black),
-      )).show(context);
-
-      print("the error is $e");
-    }
-  }
-}
+//       print("the error is $e");
+//     }
+//   }
+// }

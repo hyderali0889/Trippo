@@ -8,10 +8,12 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:trippo_user/Container/Repositories/address_parser_repo.dart';
 import 'package:location/location.dart' as loc;
 import 'package:geocoder2/geocoder2.dart';
+import 'package:trippo_user/Container/Repositories/firestore_repo.dart';
 import 'package:trippo_user/Container/utils/keys.dart';
 import '../../../Container/Repositories/direction_polylines_repo.dart';
 import '../../../Container/utils/set_blackmap.dart';
 import '../../../Model/direction_model.dart';
+import '../../../Model/driver_model.dart';
 import '../../Routes/routes.dart';
 
 final cameraMovementProvider = StateProvider<LatLng?>((ref) {
@@ -22,6 +24,10 @@ final pickUpLocationProvider = StateProvider<Direction?>((ref) {
 });
 final dropOffLocationProvider = StateProvider<Direction?>((ref) {
   return null;
+});
+
+final availableDriversProvider = StateProvider<List<DriverModel>>((ref) {
+  return [];
 });
 
 final addressProvider = StateProvider<String?>((ref) {
@@ -65,7 +71,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.sizeOf(context);
-
 
     return Scaffold(
       body: SafeArea(
@@ -117,7 +122,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   Positioned(
                     bottom: 0,
                     child: Container(
-                      height: 300,
+                      height: 320,
                       width: size.width,
                       decoration: const BoxDecoration(
                           color: Colors.black,
@@ -166,7 +171,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                           style: Theme.of(context)
                                               .textTheme
                                               .bodySmall,
-                                          maxLines: 3,
+                                          maxLines: 2,
                                         ),
                                       ),
                                     ],
@@ -210,7 +215,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                           style: Theme.of(context)
                                               .textTheme
                                               .bodySmall,
-                                          maxLines: 3,
+                                          maxLines: 2,
                                         ),
                                       ),
                                     ],
@@ -225,12 +230,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     InkWell(
-                                      onTap: () {
-                                        ref
-                                            .watch(dropOffLocationProvider
-                                                .notifier)
-                                            .update((state) => null);
-                                      },
+                                      onTap: changePickUpLoc,
                                       child: Container(
                                         alignment: Alignment.center,
                                         height: 50,
@@ -239,8 +239,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                             borderRadius:
                                                 BorderRadius.circular(14.0),
                                             color: Colors.blue),
-                                        child: const Text(
-                                            "Change Pickup Location"),
+                                        child: Text(
+                                          "Change Pickup Location",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall,
+                                        ),
                                       ),
                                     ),
                                     InkWell(
@@ -252,8 +256,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                             borderRadius:
                                                 BorderRadius.circular(14.0),
                                             color: Colors.orange),
-                                        child:
-                                            const Text("Request a Ride"),
+                                        child: Text(
+                                          "Request a Ride",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -293,6 +301,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
+  void changePickUpLoc() async {
+    try {
+      ref.watch(dropOffLocationProvider.notifier).update((state) => null);
+
+      ref
+          .watch(mainMarkersProvider)
+          .removeWhere((element) => element.markerId.value == "pickUpId");
+      ref
+          .watch(mainMarkersProvider)
+          .removeWhere((element) => element.markerId.value == "dropOffId");
+      ref
+          .watch(mainCirclesProvider)
+          .removeWhere((ele) => ele.circleId.value == "pickUpCircle");
+      ref
+          .watch(mainCirclesProvider)
+          .removeWhere((ele) => ele.circleId.value == "dropOffCircle");
+      ref.watch(mainPolylinesProvider.notifier).update((state) => {});
+      Position pos = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+
+      controller!.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+          target: LatLng(pos.latitude, pos.longitude), zoom: 14)));
+    } catch (e) {
+      ElegantNotification.error(
+          description: Text(
+        "An Error Occurred $e",
+        style: const TextStyle(color: Colors.black),
+      )).show(context);
+    }
+  }
+
   /// [getUserLoc] fetches a the users location as soon as user start the app
 
   void getUserLoc() async {
@@ -307,6 +346,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         await ref
             .watch(addressParserProvider)
             .humanReadableAddress(pos, context, ref);
+      }
+      if (context.mounted) {
+        ref.read(firestoreRepoProvider).getDriverData(context, ref);
       }
     } catch (e) {
       ElegantNotification.error(
@@ -352,7 +394,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     try {
       await context.pushNamed(Routes().whereTo, extra: controller);
 
-      if (ref.watch(dropOffLocationProvider)!.locationLatitude == null) {
+      if (ref.watch(dropOffLocationProvider) == null) {
         return;
       }
 

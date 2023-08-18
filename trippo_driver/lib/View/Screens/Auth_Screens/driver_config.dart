@@ -165,14 +165,14 @@ class _DriverConfigsScreenState extends State<DriverConfigsScreen> {
       }
       ref.watch(isLoadingProvider.notifier).update((state) => true);
 
-      ref.watch(addDriverDataProvider).addDriversDataToFirestore(
+      ref.watch(firestoreRepoProvider).addDriversDataToFirestore(
           context,
           carNameController.text.trim(),
           plateNumController.text.trim(),
           ref.watch(dropDownProvider)!);
 
       if (context.mounted) {
-        context.goNamed(Routes().home);
+        context.goNamed(Routes().navigationScreen);
       }
     } catch (e) {
       ref.watch(isLoadingProvider.notifier).update((state) => false);

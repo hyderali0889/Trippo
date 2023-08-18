@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:trippo_driver/View/Routes/routes.dart';
 import 'package:trippo_driver/View/Screens/Auth_Screens/login_screen.dart';
 import 'package:trippo_driver/View/Screens/Auth_Screens/register_screen.dart';
-import 'package:trippo_driver/View/Screens/Main_Screens/Sub_Screens/where_to_screen.dart';
-import 'package:trippo_driver/View/Screens/Main_Screens/home_screen.dart';
+import 'package:trippo_driver/View/Screens/Nav_Screens/navigation_screen.dart';
 import 'package:trippo_driver/View/Screens/Other_Screens/splash_screen.dart';
 
 import '../Screens/Auth_Screens/driver_config.dart';
@@ -18,9 +16,6 @@ final GlobalKey<NavigatorState> _rootNavigatorKey =
 final GoRouter router = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: '/${Routes().splash}',
-
-
-
   routes:allRoutes
 );
 
@@ -60,28 +55,13 @@ final List<RouteBase> allRoutes =[
       },
     ),
     GoRoute(
-      name: Routes().home,
-      path: '/${Routes().home}',
+      name: Routes().navigationScreen,
+      path: '/${Routes().navigationScreen}',
       builder: (BuildContext context, GoRouterState state) {
-        return const HomeScreen();
+        return const NavigationScreen();
       },
     ),
 
     // Main Routes
-
-
-  // Main Sub Routes
- GoRoute(
-
-      name: Routes().whereTo,
-      path: '/${Routes().whereTo}',
-
-      builder: (BuildContext context, GoRouterState state) {
-
-        return  WhereToScreen( controller:state.extra as GoogleMapController ,);
-      },
-    ),
-
-
   ];
 

@@ -30,7 +30,7 @@ class AddressParser {
             locationLatitude: userPosition.latitude,
             locationLongitude: userPosition.longitude,
             humanReadableAddress: res.data["results"][0]["formatted_address"]);
-        ref.read(pickUpLocationProvider.notifier).update((state) => model);
+        ref.read(driversLocationProvider.notifier).update((state) => model);
 
         return res.data["results"][0]["formatted_address"];
       } else {
