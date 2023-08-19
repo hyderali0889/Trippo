@@ -348,7 +348,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             .humanReadableAddress(pos, context, ref);
       }
       if (context.mounted) {
-        ref.read(firestoreRepoProvider).getDriverData(context, ref);
+        ref.read(firestoreRepoProvider).getDriverData(context, ref,LatLng(pos.latitude, pos.longitude));
       }
     } catch (e) {
       ElegantNotification.error(

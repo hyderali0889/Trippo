@@ -103,16 +103,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           .watch(firestoreRepoProvider)
                           .getDriverDetails(context);
                     },
-                    onCameraMove: (CameraPosition pos) {
-                      // if (ref.watch(cameraMovementProvider) != pos.target) {
-                      //   ref
-                      //       .watch(cameraMovementProvider.notifier)
-                      //       .update((state) => pos.target);
-                      // }
-                    },
-                    onCameraIdle: () {
-                      // getAddressfromCordinates();
-                    },
+                   
                   ),
                   ref.watch(isDriverActiveProvider)
                       ? Container()
@@ -134,7 +125,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             onTap: () {
                               if (!ref.watch(isDriverActiveProvider)) {
                                 getDriverOnline();
-                               
                               } else {
                                 getDriverOffline();
                               }
@@ -189,13 +179,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void getDriverLoc() async {
     try {
+
+      /// get driver's location
       Position pos = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);
-
+/// animate camera to current driver's location
       controller!.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
           target: LatLng(pos.latitude, pos.longitude), zoom: 14)));
 
       if (context.mounted) {
+        /// get human readable address of the driver
         await ref
             .watch(addressParserProvider)
             .humanReadableAddress(pos, context, ref);
@@ -240,19 +233,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void getDriverOnline() async {
     try {
+      /// creating location's Geo Point
       GeoFirePoint myLocation = geo.point(
           latitude: ref.read(driversLocationProvider)!.locationLatitude!,
           longitude: ref.read(driversLocationProvider)!.locationLongitude!);
 
-      print(myLocation);
+  /// set driver's current location
       ref
           .read(firestoreRepoProvider)
           .setDriverLocationStatus(context, myLocation);
 
+ /// track driver's location as driver moves
+
+ Geolocator.getPositionStream().listen((event) {
+         ref
+          .read(firestoreRepoProvider)
+          .setDriverLocationStatus(context, myLocation);
+
+      });
+
+/// Driver's current position in [LatLng]
       LatLng driverPos = LatLng(
           ref.read(driversLocationProvider)!.locationLatitude!,
           ref.read(driversLocationProvider)!.locationLongitude!);
 
+
+ /// animate to current driver's position
       controller!.animateCamera(CameraUpdate.newLatLng(driverPos));
 
       ref.read(firestoreRepoProvider).setDriverStatus(context, "Idle");
@@ -266,14 +272,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-
   void getDriverOffline() async {
     try {
-      ref.watch(isDriverActiveProvider.notifier).update((state) => false);
 
+    /// deactivate Driver
+      ref.watch(isDriverActiveProvider.notifier).update((state) => false);
+  /// set Driver's status to be offline
       ref.read(firestoreRepoProvider).setDriverStatus(context, "offline");
+  /// removve driver's location from database
       ref.read(firestoreRepoProvider).setDriverLocationStatus(context, null);
+
       await Future.delayed(const Duration(seconds: 2));
+  /// close the application
       SystemChannels.platform.invokeMethod("SystemNavigator.pop");
       if (context.mounted) {
         ElegantNotification.success(

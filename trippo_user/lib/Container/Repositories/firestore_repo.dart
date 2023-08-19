@@ -14,8 +14,10 @@ final firestoreRepoProvider = Provider<FirestoreRepo>((ref) {
 class FirestoreRepo {
   final geo = GeoFlutterFire();
   FirebaseFirestore db = FirebaseFirestore.instance;
-  void getDriverData(BuildContext context, WidgetRef ref) async {
+  void getDriverData(
+      BuildContext context, WidgetRef ref, LatLng userPos) async {
     try {
+      /// getting [DriverData] from [FirebaseFirestore]
       QuerySnapshot<Map<String, dynamic>> drivers =
           await db.collection("Drivers").get();
 
@@ -35,28 +37,43 @@ class FirestoreRepo {
           return;
         }
 
-        Marker marker = Marker(
-            markerId:  MarkerId(driver.data()["Car Name"]),
-            infoWindow: InfoWindow(title: driver.data()["Car Name"] ,),
-            position: LatLng(driver.data()["driverLoc"]["geopoint"].latitude,
-                driver.data()["driverLoc"]["geopoint"].longitude),
-            icon: await BitmapDescriptor.fromAssetImage(
-              const ImageConfiguration(),
-              "assets/imgs/sedan.png",
-            ));
-
-        ref
-            .read(mainMarkersProvider.notifier)
-            .update((state) => {...state, marker});
-
         ref
             .read(availableDriversProvider.notifier)
             .update((state) => [...state, model]);
-
-        print("added a driver , ${ ref
-            .read(availableDriversProvider).length} , ${ref
-            .read(mainMarkersProvider).length} ");
       }
+
+      // Get stream of drivers
+
+      GeoFirePoint center =
+          geo.point(latitude: userPos.latitude, longitude: userPos.longitude);
+
+      Stream<List<DocumentSnapshot<Object?>>> allDriversStream = geo
+          .collection(collectionRef: db.collection("Drivers"))
+          .within(center: center, radius: 50, field: "driverLoc", strictMode: true);
+
+      allDriversStream.listen((event) async {
+
+        for (var driver in event) {
+
+          if (driver["driverStatus"] == "offline") {
+            return;
+          }
+          Marker marker = Marker(
+              markerId: MarkerId(driver["Car Name"]),
+              infoWindow: InfoWindow(
+                title: driver["Car Name"],
+              ),
+              position: LatLng(driver["driverLoc"]["geopoint"].latitude,
+                  driver["driverLoc"]["geopoint"].longitude),
+              icon: await BitmapDescriptor.fromAssetImage(
+                const ImageConfiguration(),
+                "assets/imgs/sedan.png",
+              ));
+          ref
+              .read(mainMarkersProvider.notifier)
+              .update((state) => {...state, marker});
+        }
+      });
     } catch (e) {
       print("error data is $e");
       ElegantNotification.error(
