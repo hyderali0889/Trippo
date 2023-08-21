@@ -1,10 +1,10 @@
-import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:trippo_user/Container/Repositories/place_details_repo.dart';
 import 'package:trippo_user/Model/predicted_places.dart';
 import '../../../../Container/Repositories/predicted_places_repo.dart';
+import '../../../../Container/utils/error_notification.dart';
 
 final predictedPlacesProvider =
     StateProvider.autoDispose<List<PredictedPlaces>?>((ref) {
@@ -150,8 +150,7 @@ class _WhereToScreenState extends State<WhereToScreen> {
 
 
     } catch (e) {
-      ElegantNotification.error(description: Text("An Error Occurred $e"))
-          .show(context);
+        ErrorNotification().showError(context,    "An Error Occurred $e");
     }
   }
 }

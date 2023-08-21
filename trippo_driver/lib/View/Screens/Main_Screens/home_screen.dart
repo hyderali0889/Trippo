@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:elegant_notification/elegant_notification.dart';
 //import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,10 +10,12 @@ import 'package:location/location.dart' as loc;
 //import 'package:geocoder2/geocoder2.dart';
 import 'package:trippo_driver/Container/Repositories/firestore_repo.dart';
 //import 'package:trippo_driver/Container/utils/keys.dart';
+import '../../../Container/utils/error_notification.dart';
 import '../../../Container/utils/set_blackmap.dart';
 import '../../../Model/direction_model.dart';
 //import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
+
 
 // final cameraMovementProvider = StateProvider<LatLng?>((ref) {
 //   return null;
@@ -65,12 +66,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Geolocator geoLocator = Geolocator();
 
   @override
-  void initState() {
-    super.initState();
-    checkPermissions();
-  }
-
-  @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.sizeOf(context);
 
@@ -103,7 +98,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           .watch(firestoreRepoProvider)
                           .getDriverDetails(context);
                     },
-                   
                   ),
                   ref.watch(isDriverActiveProvider)
                       ? Container()
@@ -151,39 +145,52 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   // end of body
 
-  /// [checkPermissions] checking the permission status
+  // /// [checkPermissions] checking the permission status
 
-  void checkPermissions() async {
-    try {
-      LocationPermission permission = await Geolocator.checkPermission();
+  // void checkPermissions() async {
+  //   try {
+  //     LocationPermission permission = await Geolocator.checkPermission();
 
-      if (permission == LocationPermission.denied) {
-        await Geolocator.requestPermission();
-        return;
-      }
-
-      if (permission == LocationPermission.deniedForever ||
-          permission == LocationPermission.unableToDetermine) {
-        return;
-      }
-    } catch (e) {
-      ElegantNotification.error(
-          description: Text(
-        "An Error Occurred $e",
-        style: const TextStyle(color: Colors.black),
-      )).show(context);
-    }
-  }
+  //     if (permission == LocationPermission.denied) {
+  //       await Geolocator.requestPermission();
+  //       if (context.mounted &&
+  //           (permission == LocationPermission.whileInUse ||
+  //               permission == LocationPermission.always)) {
+  //         print("Done");
+  //         setState(() {});
+  //       }
+  //       return;
+  //     }
+  //     if (permission == LocationPermission.deniedForever ||
+  //         permission == LocationPermission.unableToDetermine) {
+  //       if (context.mounted) {
+  //         ElegantNotification.error(
+  //             description: const Text(
+  //           "Cannot get you location",
+  //           style: TextStyle(color: Colors.red),
+  //         )).show(context);
+  //       }
+  //       return;
+  //     }
+  //   } catch (e) {
+  //     print("An Error Occurred $e");
+  //     // ElegantNotification.error(
+  //     //     description: Text(
+  //     //   "An Error Occurred $e",
+  //     //   style: const TextStyle(color: Colors.black),
+  //     // )).show(context);
+  //   }
+  // }
 
   /// [getDriverLoc] fetches a the drivers location as soon as user start the app
 
   void getDriverLoc() async {
     try {
-
       /// get driver's location
       Position pos = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);
-/// animate camera to current driver's location
+
+      /// animate camera to current driver's location
       controller!.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
           target: LatLng(pos.latitude, pos.longitude), zoom: 14)));
 
@@ -194,11 +201,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             .humanReadableAddress(pos, context, ref);
       }
     } catch (e) {
-      ElegantNotification.error(
-          description: Text(
-        "An Error Occurred $e",
-        style: const TextStyle(color: Colors.black),
-      )).show(context);
+
+             ErrorNotification().showError(context, "An Error Occurred $e");
     }
   }
 
@@ -238,66 +242,58 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           latitude: ref.read(driversLocationProvider)!.locationLatitude!,
           longitude: ref.read(driversLocationProvider)!.locationLongitude!);
 
-  /// set driver's current location
+      /// set driver's current location
       ref
           .read(firestoreRepoProvider)
           .setDriverLocationStatus(context, myLocation);
 
- /// track driver's location as driver moves
+      /// track driver's location as driver moves
 
- Geolocator.getPositionStream().listen((event) {
-         ref
-          .read(firestoreRepoProvider)
-          .setDriverLocationStatus(context, myLocation);
-
+      Geolocator.getPositionStream().listen((event) {
+        ref
+            .read(firestoreRepoProvider)
+            .setDriverLocationStatus(context, myLocation);
       });
 
-/// Driver's current position in [LatLng]
+      /// Driver's current position in [LatLng]
       LatLng driverPos = LatLng(
           ref.read(driversLocationProvider)!.locationLatitude!,
           ref.read(driversLocationProvider)!.locationLongitude!);
 
-
- /// animate to current driver's position
+      /// animate to current driver's position
       controller!.animateCamera(CameraUpdate.newLatLng(driverPos));
 
       ref.read(firestoreRepoProvider).setDriverStatus(context, "Idle");
       ref.watch(isDriverActiveProvider.notifier).update((state) => true);
     } catch (e) {
-      ElegantNotification.error(
-          description: Text(
-        "An Error Occurred $e",
-        style: const TextStyle(color: Colors.black),
-      )).show(context);
+           ErrorNotification().showError(context, "An Error Occurred $e");
+
     }
   }
 
   void getDriverOffline() async {
     try {
-
-    /// deactivate Driver
+      /// deactivate Driver
       ref.watch(isDriverActiveProvider.notifier).update((state) => false);
-  /// set Driver's status to be offline
+
+      /// set Driver's status to be offline
       ref.read(firestoreRepoProvider).setDriverStatus(context, "offline");
-  /// removve driver's location from database
+
+      /// removve driver's location from database
       ref.read(firestoreRepoProvider).setDriverLocationStatus(context, null);
 
       await Future.delayed(const Duration(seconds: 2));
-  /// close the application
+
+      /// close the application
       SystemChannels.platform.invokeMethod("SystemNavigator.pop");
       if (context.mounted) {
-        ElegantNotification.success(
-            description: const Text(
-          "You are now Offline",
-          style: TextStyle(color: Colors.black),
-        )).show(context);
+               ErrorNotification().showSuccess(context,    "You are now Offline");
+
+
       }
     } catch (e) {
-      ElegantNotification.error(
-          description: Text(
-        "An Error Occurred $e",
-        style: const TextStyle(color: Colors.black),
-      )).show(context);
+            ErrorNotification().showError(context, "An Error Occurred $e");
+
     }
   }
 }

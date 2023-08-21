@@ -1,7 +1,8 @@
-import 'package:elegant_notification/elegant_notification.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../utils/error_notification.dart';
 
 /// [authRepoProvider] used to cache the [AuthRepo] class to prevent it from creating multiple instances
 
@@ -17,8 +18,7 @@ class AuthRepo {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
     } catch (e) {
-      ElegantNotification.error(description: Text("An Error Occurred $e"))
-          .show(context);
+      ErrorNotification().showError(context, "An Error Occurred $e");
     }
   }
 
@@ -27,8 +27,7 @@ class AuthRepo {
       await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
     } catch (e) {
-      ElegantNotification.error(description: Text("An Error Occurred $e"))
-          .show(context);
+      ErrorNotification().showError(context, "An Error Occurred $e");
     }
   }
 }

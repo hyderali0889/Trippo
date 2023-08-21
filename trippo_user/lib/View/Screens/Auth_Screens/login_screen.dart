@@ -1,9 +1,9 @@
-import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:trippo_user/Container/Repositories/auth_repo.dart';
 import 'package:trippo_user/View/Components/all_components.dart';
 
+import '../../../Container/utils/error_notification.dart';
 import '../../Routes/routes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -90,11 +90,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                                         .text.isEmpty ||
                                                     passwordController
                                                         .text.isEmpty) {
-                                                  ElegantNotification.error(
-                                                          height: 50,
-                                                          description: const Text(
-                                                              "Please Enter Email and Password"))
-                                                      .show(context);
+                                                             ErrorNotification().showError(context,  "Please Enter Email and Password");
+
                                                   return;
                                                 }
                                                 ref
@@ -115,16 +112,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                                         .notifier)
                                                     .update((state) => false);
 
-                                               
+
                                               } catch (e) {
                                                 ref
                                                     .watch(isLoadingProvider
                                                         .notifier)
                                                     .update((state) => false);
-                                                ElegantNotification.error(
-                                                        description: Text(
-                                                            "An Error Occurred $e"))
-                                                    .show(context);
+                                                        ErrorNotification().showError(context,    "An Error Occurred $e");
+
                                               }
                                             },
                                       child: Components().mainButton(

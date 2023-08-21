@@ -63,12 +63,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   GoogleMapController? controller;
 
   @override
-  void initState() {
-    super.initState();
-    checkPermissions();
-  }
-
-  @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.sizeOf(context);
 
@@ -278,28 +272,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   // end of body
 
-  /// [checkPermissions] checking the permission status
 
-  void checkPermissions() async {
-    try {
-      LocationPermission permission = await Geolocator.checkPermission();
-
-      if (permission == LocationPermission.denied) {
-        await Geolocator.requestPermission();
-      }
-
-      if (permission == LocationPermission.deniedForever ||
-          permission == LocationPermission.unableToDetermine) {
-        return;
-      }
-    } catch (e) {
-      ElegantNotification.error(
-          description: Text(
-        "An Error Occurred $e",
-        style: const TextStyle(color: Colors.black),
-      )).show(context);
-    }
-  }
 
   void changePickUpLoc() async {
     try {

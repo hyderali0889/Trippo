@@ -1,11 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:elegant_notification/elegant_notification.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:trippo_user/Container/utils/keys.dart';
 import 'package:trippo_user/View/Screens/Main_Screens/home_screen.dart';
 import '../../Model/direction_model.dart';
+import '../utils/error_notification.dart';
 
 /// [addressParserProvider] used to cache the [AddressParser] class to prevent it from creating multiple instances
 
@@ -34,13 +33,10 @@ class AddressParser {
 
         return res.data["results"][0]["formatted_address"];
       } else {
-        ElegantNotification.error(description: const Text("Failed to get data"))
-            .show(context);
+         ErrorNotification().showError(context, "Failed to get data");
       }
     } catch (e) {
-      print("error data is $e");
-      ElegantNotification.error(description: Text("An Error Occurred $e"))
-          .show(context);
+        ErrorNotification().showError(context, "An Error Occurred $e");
     }
   }
 }

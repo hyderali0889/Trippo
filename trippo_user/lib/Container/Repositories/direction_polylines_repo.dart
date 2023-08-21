@@ -7,6 +7,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:trippo_user/Container/utils/keys.dart';
 import 'package:trippo_user/Model/direction_polyline_details_model.dart';
 import 'package:trippo_user/View/Screens/Main_Screens/home_screen.dart';
+
+import '../utils/error_notification.dart';
 /// [directionPolylinesRepoProvider] used to cache the [DirectionPolylines] class to prevent it from creating multiple instances
 
 
@@ -47,13 +49,11 @@ class DirectionPolylines {
 
         return model;
       } else {
-        ElegantNotification.error(description: const Text("Failed to get data"))
-            .show(context);
+           ErrorNotification().showError(context, "Failed to get data");
+
       }
     } catch (e) {
-      print("error data is $e");
-      ElegantNotification.error(description: Text("An Error Occurred $e"))
-          .show(context);
+        ErrorNotification().showError(context, "An Error Occurred $e");
     }
   }
 

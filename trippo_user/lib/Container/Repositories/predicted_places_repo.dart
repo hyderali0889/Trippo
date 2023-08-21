@@ -1,11 +1,11 @@
 import 'package:dio/dio.dart';
-import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trippo_user/Container/utils/keys.dart';
 import 'package:trippo_user/Model/predicted_places.dart';
 
 import '../../View/Screens/Main_Screens/Sub_Screens/where_to_screen.dart';
+import '../utils/error_notification.dart';
 /// [predictedPlacesRepoProvider] used to cache the [PredictedPlacesRepo] class to prevent it from creating multiple instances
 
 final predictedPlacesRepoProvider = Provider<PredictedPlacesRepo>((ref) {
@@ -41,15 +41,12 @@ class PredictedPlacesRepo {
             .update((state) => predictedPlacesList);
       } else {
         if (context.mounted) {
-          ElegantNotification.error(
-                  description: const Text("Failed to get data"))
-              .show(context);
+             ErrorNotification().showError(context,"Failed to get data");
+
         }
       }
     } catch (e) {
-      print("error data is $e");
-      ElegantNotification.error(description: Text("An Error Occurred $e"))
-          .show(context);
+        ErrorNotification().showError(context, "An Error Occurred $e");
     }
   }
 }

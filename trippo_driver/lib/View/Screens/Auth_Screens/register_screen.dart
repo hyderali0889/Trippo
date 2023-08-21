@@ -1,9 +1,9 @@
-import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:trippo_driver/Container/Repositories/auth_repo.dart';
 
+import '../../../Container/utils/error_notification.dart';
 import '../../Components/all_components.dart';
 import '../../Routes/routes.dart';
 
@@ -101,11 +101,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                                         .text.isEmpty ||
                                                     passwordController
                                                         .text.isEmpty) {
-                                                  ElegantNotification.error(
-                                                          height: 50,
-                                                          description: const Text(
-                                                              "Please Enter Email and Password"))
-                                                      .show(context);
+                                                            ErrorNotification().showError(context,  "Please Enter Email and Password");
+
                                                   return;
                                                 }
 
@@ -136,10 +133,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                                     .watch(isLoadingProvider
                                                         .notifier)
                                                     .update((state) => false);
-                                                ElegantNotification.error(
-                                                        description: Text(
-                                                            "An Error Occurred $e"))
-                                                    .show(context);
+                                                 ErrorNotification().showError(context, "An Error Occurred $e");
                                               }
                                             },
                                       child: Components().mainButton(

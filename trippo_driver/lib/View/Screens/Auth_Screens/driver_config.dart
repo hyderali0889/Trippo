@@ -1,4 +1,3 @@
-import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +6,7 @@ import 'package:trippo_driver/View/Components/all_components.dart';
 import 'package:trippo_driver/View/Routes/routes.dart';
 
 import '../../../Container/Repositories/firestore_repo.dart';
+import '../../../Container/utils/error_notification.dart';
 
 final dropDownProvider = StateProvider.autoDispose<String?>((ref) => "SUV");
 final isLoadingProvider = StateProvider.autoDispose<bool>((ref) => false);
@@ -156,11 +156,8 @@ class _DriverConfigsScreenState extends State<DriverConfigsScreen> {
   void sendDataToFirestore(ref) async {
     try {
       if (carNameController.text.isEmpty || plateNumController.text.isEmpty) {
-        ElegantNotification.error(
-                height: 50,
-                description:
-                    const Text("Please Enter Car Name and Plate Number"))
-            .show(context);
+          ErrorNotification().showError(context, "Please Enter Car Name and Plate Number");
+
         return;
       }
       ref.watch(isLoadingProvider.notifier).update((state) => true);
@@ -176,8 +173,7 @@ class _DriverConfigsScreenState extends State<DriverConfigsScreen> {
       }
     } catch (e) {
       ref.watch(isLoadingProvider.notifier).update((state) => false);
-      ElegantNotification.error(description: Text("An Error Occurred $e" , style:const TextStyle(color: Colors.black)))
-          .show(context);
+          ErrorNotification().showError(context, "An Error Occurred $e");
     }
   }
 }

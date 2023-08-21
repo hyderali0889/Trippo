@@ -1,11 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:trippo_user/Model/driver_model.dart';
 import 'package:trippo_user/View/Screens/Main_Screens/home_screen.dart';
+
+import '../utils/error_notification.dart';
 
 final firestoreRepoProvider = Provider<FirestoreRepo>((ref) {
   return FirestoreRepo();
@@ -21,13 +22,12 @@ class FirestoreRepo {
       QuerySnapshot<Map<String, dynamic>> drivers =
           await db.collection("Drivers").get();
 
-      for (var driver in drivers.docs) {
+       for (var driver in drivers.docs) {
         DriverModel model = DriverModel(
-            driver.data()["Car Name"],
-            driver.data()["Car Plate Num"],
+          driver.data()["Car Name"],
+                driver.data()["Car Plate Num"],
             driver.data()["Car Type"],
-            geo.point(
-                latitude: driver.data()["driverLoc"]["geopoint"].latitude,
+            geo.point(latitude: driver.data()["driverLoc"]["geopoint"].latitude,
                 longitude: driver.data()["driverLoc"]["geopoint"].longitude),
             driver.data()["driverStatus"],
             driver.data()["email"],
@@ -42,7 +42,6 @@ class FirestoreRepo {
             .update((state) => [...state, model]);
       }
 
-      // Get stream of drivers
 
       GeoFirePoint center =
           geo.point(latitude: userPos.latitude, longitude: userPos.longitude);
@@ -64,23 +63,16 @@ class FirestoreRepo {
                 title: driver["Car Name"],
               ),
               position: LatLng(driver["driverLoc"]["geopoint"].latitude,
-                  driver["driverLoc"]["geopoint"].longitude),
-              icon: await BitmapDescriptor.fromAssetImage(
+                  driver["driverLoc"]["geopoint"].longitude),              icon: await BitmapDescriptor.fromAssetImage(
                 const ImageConfiguration(),
                 "assets/imgs/sedan.png",
               ));
           ref
-              .read(mainMarkersProvider.notifier)
-              .update((state) => {...state, marker});
+             .read(mainMarkersProvider.notifier)              .update((state) => {...state, marker});
         }
       });
     } catch (e) {
-      print("error data is $e");
-      ElegantNotification.error(
-          description: Text(
-        "An Error Occurred $e",
-        style: const TextStyle(color: Colors.black),
-      )).show(context);
+      ErrorNotification().showError(context, "An Error Occurred $e");
     }
   }
 }

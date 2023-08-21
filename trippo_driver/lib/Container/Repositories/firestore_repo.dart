@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:elegant_notification/elegant_notification.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:trippo_driver/Model/driver_info_model.dart';
+
+import '../utils/error_notification.dart';
 
 final firestoreRepoProvider = Provider<AddFirestoreData>((ref) {
   return AddFirestoreData();
@@ -28,8 +29,7 @@ class AddFirestoreData {
         "Car Type": carType
       });
     } catch (e) {
-      ElegantNotification.error(description: Text("An Error Occurred $e"))
-          .show(context);
+      ErrorNotification().showError(context, "An Error Occurred $e");
     }
   }
 
@@ -50,8 +50,7 @@ class AddFirestoreData {
 
       print("data is ${driver.carType}");
     } catch (e) {
-      ElegantNotification.error(description: Text("An Error Occurred $e"))
-          .show(context);
+       ErrorNotification().showError(context, "An Error Occurred $e");
     }
   }
 
@@ -62,8 +61,7 @@ class AddFirestoreData {
           .doc(auth.currentUser!.email.toString())
           .update({"driverStatus": status});
     } catch (e) {
-      ElegantNotification.error(description: Text("An Error Occurred $e"))
-          .show(context);
+    ErrorNotification().showError(context, "An Error Occurred $e");
     }
   }
   void setDriverLocationStatus(BuildContext context, GeoFirePoint? loc) async {
@@ -73,8 +71,7 @@ class AddFirestoreData {
           .doc(auth.currentUser!.email.toString())
           .update({"driverLoc": loc?.data});
     } catch (e) {
-      ElegantNotification.error(description: Text("An Error Occurred $e" , style: const TextStyle(color: Colors.black),))
-          .show(context);
+      ErrorNotification().showError(context, "An Error Occurred $e");
     }
   }
 }
