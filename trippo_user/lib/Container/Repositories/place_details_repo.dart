@@ -7,6 +7,7 @@ import 'package:trippo_user/View/Screens/Main_Screens/home_screen.dart';
 import '../../Model/direction_model.dart';
 import '../../View/Screens/Main_Screens/Sub_Screens/where_to_screen.dart';
 import '../utils/error_notification.dart';
+
 /// [placeDetailsRepoProvider] used to cache the [PlaceDetailsRepo] class to prevent it from creating multiple instances
 
 final placeDetailsRepoProvider = Provider<PlaceDetailsRepo>((ref) {
@@ -14,10 +15,8 @@ final placeDetailsRepoProvider = Provider<PlaceDetailsRepo>((ref) {
 });
 
 class PlaceDetailsRepo {
-
- /// [getAllPredictedPlaceDetails] gets the details of the location by getting location ID from [placeId] and fetching the
- /// data related to this [placeId] when user Clicks on any item inside of the [ListView] in the [WhereTo] screen and return a [Direction] model which directing user back to [HomeScreen]
-
+  /// [getAllPredictedPlaceDetails] gets the details of the location by getting location ID from [placeId] and fetching the
+  /// data related to this [placeId] when user Clicks on any item inside of the [ListView] in the [WhereTo] screen and return a [Direction] model which directing user back to [HomeScreen]
 
   Future<dynamic> getAllPredictedPlaceDetails(
       String placeId, BuildContext context, WidgetRef ref, controller) async {
@@ -43,18 +42,19 @@ class PlaceDetailsRepo {
 
         ref.read(whereToLoadingProvider.notifier).update((state) => false);
 
-
-          if (context.mounted) {
-            context.pop();
-          }
-
+        if (context.mounted) {
+          context.pop();
+        }
       } else {
         if (context.mounted) {
-           ErrorNotification().showError(context,"Failed to get data");
+          ErrorNotification().showError(context, "Failed to get data");
         }
       }
     } catch (e) {
-      ErrorNotification().showError(context, "An Error Occurred $e");
+      print("err is $e");
+      if (context.mounted) {
+        ErrorNotification().showError(context, "An Error Occurred $e");
+      }
     }
   }
 }

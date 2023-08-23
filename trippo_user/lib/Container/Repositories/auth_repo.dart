@@ -15,29 +15,31 @@ final authRepoProvider = Provider<AuthRepo>((ref) {
 /// [AuthRepo] provides functions used for authentication purposes
 
 class AuthRepo {
-  void loginUser(email, password,BuildContext context) async {
+  void loginUser(email, password, BuildContext context) async {
     try {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
-           if (context.mounted) {
-                                                  context.goNamed(
-                                                      Routes().home);
-                                                }
+      if (context.mounted) {
+        context.goNamed(Routes().home);
+      }
     } catch (e) {
+      if (context.mounted) {
         ErrorNotification().showError(context, "An Error Occurred $e");
+      }
     }
   }
 
-  void registerUser(email, password,BuildContext context) async {
+  void registerUser(email, password, BuildContext context) async {
     try {
       await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
-           if (context.mounted) {
-                                                  context.goNamed(
-                                                      Routes().home);
-                                                }
+      if (context.mounted) {
+        context.goNamed(Routes().home);
+      }
     } catch (e) {
-     ErrorNotification().showError(context, "An Error Occurred $e");
+      if (context.mounted) {
+        ErrorNotification().showError(context, "An Error Occurred $e");
+      }
     }
   }
 }

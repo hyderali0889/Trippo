@@ -146,11 +146,14 @@ class _WhereToScreenState extends State<WhereToScreen> {
   void setDropOffLocation(WidgetRef ref, int index) async {
     try {
       await ref.read(placeDetailsRepoProvider).getAllPredictedPlaceDetails(
-          ref.read(predictedPlacesProvider)![index].placeId!, context, ref , widget.controller);
-
-
+          ref.read(predictedPlacesProvider)![index].placeId!,
+          context,
+          ref,
+          widget.controller);
     } catch (e) {
-        ErrorNotification().showError(context,    "An Error Occurred $e");
+      if (context.mounted) {
+        ErrorNotification().showError(context, "An Error Occurred $e");
+      }
     }
   }
 }

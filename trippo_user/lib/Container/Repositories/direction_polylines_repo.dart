@@ -9,18 +9,16 @@ import 'package:trippo_user/Model/direction_polyline_details_model.dart';
 import 'package:trippo_user/View/Screens/Main_Screens/home_screen.dart';
 
 import '../utils/error_notification.dart';
-/// [directionPolylinesRepoProvider] used to cache the [DirectionPolylines] class to prevent it from creating multiple instances
 
+/// [directionPolylinesRepoProvider] used to cache the [DirectionPolylines] class to prevent it from creating multiple instances
 
 final directionPolylinesRepoProvider = Provider<DirectionPolylines>((ref) {
   return DirectionPolylines();
 });
 
 class DirectionPolylines {
-
   /// [getDirectionsPolylines] function takes the [pickUpDestination] and  the [dropOffDestination] from the user and fetches the direction data from google maps api
   /// and returns the response in form of [DirectionPolylineDetails]
-
 
   Future<dynamic> getDirectionsPolylines(
       context, WidgetRef ref, controller) async {
@@ -46,14 +44,12 @@ class DirectionPolylines {
           durationValue: res.data["routes"][0]["legs"][0]["duration"]["value"],
         );
 
-
         return model;
       } else {
-           ErrorNotification().showError(context, "Failed to get data");
-
+        ErrorNotification().showError(context, "Failed to get data");
       }
     } catch (e) {
-        ErrorNotification().showError(context, "An Error Occurred $e");
+      ErrorNotification().showError(context, "An Error Occurred $e");
     }
   }
 
@@ -62,7 +58,6 @@ class DirectionPolylines {
   /// [setNewDirectionPolylines] function takes the [DirectionPolylineDetails] model from the [getDirectionsPolylines] function
   ///  and adds the decoded polylines data to [pLinesCoordinatedList] and creates a new [polyline] variable and alots the var to [mainPolylinesProvider] located in the [HomeScreen]
   /// and creates LatLng [Bounds] which would animates the [GoogleMapsController] controller to the new position with polylines on [map] and with 65 [padding]
-
 
   void setNewDirectionPolylines(ref, context, controller) async {
     try {
@@ -98,14 +93,27 @@ class DirectionPolylines {
           .read(mainPolylinesProvider.notifier)
           .update((Set<Polyline> state) => {...state, newPolyline});
 
-
-
       LatLngBounds bounds;
 
-      if (ref.read(pickUpLocationProvider)!.locationLatitude! >
-              ref.read(dropOffLocationProvider)!.locationLatitude! &&
-          ref.read(pickUpLocationProvider)!.locationLongitude! >
-              ref.read(dropOffLocationProvider)!.locationLongitude!) {
+      if (ref.read(pickUpLocationProvider)!.locationLatitude! >=
+          ref.read(dropOffLocationProvider)!.locationLatitude!) {
+        bounds = LatLngBounds(
+            southwest: LatLng(
+                ref.read(dropOffLocationProvider)!.locationLatitude!,
+                ref.read(dropOffLocationProvider)!.locationLongitude!),
+            northeast: LatLng(
+                ref.read(pickUpLocationProvider)!.locationLatitude!,
+                ref.read(pickUpLocationProvider)!.locationLongitude!));
+      } else if (ref.read(pickUpLocationProvider)!.locationLongitude! >=
+          ref.read(dropOffLocationProvider)!.locationLongitude!) {
+        bounds = LatLngBounds(
+            southwest: LatLng(
+                ref.read(dropOffLocationProvider)!.locationLatitude!,
+                ref.read(dropOffLocationProvider)!.locationLongitude!),
+            northeast: LatLng(
+                ref.read(pickUpLocationProvider)!.locationLatitude!,
+                ref.read(pickUpLocationProvider)!.locationLongitude!));
+      } else {
         bounds = LatLngBounds(
             southwest: LatLng(
                 ref.read(pickUpLocationProvider)!.locationLatitude!,
@@ -113,34 +121,32 @@ class DirectionPolylines {
             northeast: LatLng(
                 ref.read(dropOffLocationProvider)!.locationLatitude!,
                 ref.read(pickUpLocationProvider)!.locationLongitude!));
-      } else if (ref.read(pickUpLocationProvider)!.locationLatitude! >
-          ref.read(dropOffLocationProvider)!.locationLatitude!) {
-        bounds = LatLngBounds(
-            southwest: LatLng(
-                ref.read(dropOffLocationProvider)!.locationLatitude!,
-                ref.read(pickUpLocationProvider)!.locationLongitude!),
-            northeast: LatLng(
-                ref.read(pickUpLocationProvider)!.locationLatitude!,
-                ref.read(dropOffLocationProvider)!.locationLongitude!));
-      } else {
-        bounds = LatLngBounds(
-            southwest: LatLng(
-                ref.read(pickUpLocationProvider)!.locationLatitude!,
-                ref.read(pickUpLocationProvider)!.locationLongitude!),
-            northeast: LatLng(
-                ref.read(dropOffLocationProvider)!.locationLatitude!,
-                ref.read(dropOffLocationProvider)!.locationLongitude!));
-
-        controller!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 65));
       }
+      controller!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 65));
     } catch (e) {
       ElegantNotification.error(
           description: Text(
         "An Error Occurred $e",
         style: const TextStyle(color: Colors.black),
       )).show(context);
+    }
+  }
 
-      print("the error is $e");
+  double calculateRideRate(context, DirectionPolylineDetails model) {
+    try {
+      double travelFarePerMin = (model.distanceValue! / 60) * 0.1;
+      double distanceFarePerKM = (model.distanceValue! / 1000) * 0.1;
+
+      double totalFare = travelFarePerMin + distanceFarePerKM;
+      return double.parse(totalFare.toStringAsFixed(2));
+    } catch (e) {
+
+      ElegantNotification.error(
+          description: Text(
+        "An Error Occurred $e",
+        style: const TextStyle(color: Colors.black),
+      )).show(context);
+       return 0;
     }
   }
 }

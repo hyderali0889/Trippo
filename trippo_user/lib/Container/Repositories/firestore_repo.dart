@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
@@ -15,6 +16,7 @@ final firestoreRepoProvider = Provider<FirestoreRepo>((ref) {
 class FirestoreRepo {
   final geo = GeoFlutterFire();
   FirebaseFirestore db = FirebaseFirestore.instance;
+  FirebaseAuth auth = FirebaseAuth.instance;
   void getDriverData(
       BuildContext context, WidgetRef ref, LatLng userPos) async {
     try {
@@ -22,12 +24,13 @@ class FirestoreRepo {
       QuerySnapshot<Map<String, dynamic>> drivers =
           await db.collection("Drivers").get();
 
-       for (var driver in drivers.docs) {
+      for (var driver in drivers.docs) {
         DriverModel model = DriverModel(
-          driver.data()["Car Name"],
-                driver.data()["Car Plate Num"],
+            driver.data()["Car Name"],
+            driver.data()["Car Plate Num"],
             driver.data()["Car Type"],
-            geo.point(latitude: driver.data()["driverLoc"]["geopoint"].latitude,
+            geo.point(
+                latitude: driver.data()["driverLoc"]["geopoint"].latitude,
                 longitude: driver.data()["driverLoc"]["geopoint"].longitude),
             driver.data()["driverStatus"],
             driver.data()["email"],
@@ -42,19 +45,17 @@ class FirestoreRepo {
             .update((state) => [...state, model]);
       }
 
-
       GeoFirePoint center =
           geo.point(latitude: userPos.latitude, longitude: userPos.longitude);
 
       Stream<List<DocumentSnapshot<Object?>>> allDriversStream = geo
           .collection(collectionRef: db.collection("Drivers"))
-          .within(center: center, radius: 50, field: "driverLoc", strictMode: true);
+          .within(
+              center: center, radius: 50, field: "driverLoc", strictMode: true);
 
       allDriversStream.listen((event) async {
-
         for (var driver in event) {
-
-          if (driver["driverStatus"] == "offline") {
+          if (driver["driverStatus"] != "idle") {
             return;
           }
           Marker marker = Marker(
@@ -63,16 +64,68 @@ class FirestoreRepo {
                 title: driver["Car Name"],
               ),
               position: LatLng(driver["driverLoc"]["geopoint"].latitude,
-                  driver["driverLoc"]["geopoint"].longitude),              icon: await BitmapDescriptor.fromAssetImage(
-                const ImageConfiguration(),
-                "assets/imgs/sedan.png",
-              ));
+                  driver["driverLoc"]["geopoint"].longitude),
+              icon: driver["Car Type"] == "Car"
+                  ? await BitmapDescriptor.fromAssetImage(
+                      const ImageConfiguration(),
+                      "assets/imgs/sedan.png",
+                    )
+                  : driver["Car Type"] == "MotorCycle"
+                      ? await BitmapDescriptor.fromAssetImage(
+                          const ImageConfiguration(),
+                          "assets/imgs/motorbike.png",
+                        )
+                      : await BitmapDescriptor.fromAssetImage(
+                          const ImageConfiguration(),
+                          "assets/imgs/suv.png",
+                        ));
           ref
-             .read(mainMarkersProvider.notifier)              .update((state) => {...state, marker});
+              .read(mainMarkersProvider.notifier)
+              .update((state) => {...state, marker});
         }
       });
     } catch (e) {
-      ErrorNotification().showError(context, "An Error Occurred $e");
+      if (context.mounted) {
+        ErrorNotification().showError(context, "An Error Occurred $e");
+      }
+    }
+  }
+
+  void addUserRideRequestToDB(
+      context, WidgetRef ref, String driverEmail) async {
+    try {
+      await db.collection(auth.currentUser!.email.toString()).add({
+        "OriginLat": ref.read(pickUpLocationProvider)!.locationLatitude,
+        "OriginLng": ref.read(pickUpLocationProvider)!.locationLongitude,
+        "OriginAddress": ref.read(pickUpLocationProvider)!.locationName,
+        "destinationLat": ref.read(dropOffLocationProvider)!.locationLatitude,
+        "destinationLng": ref.read(dropOffLocationProvider)!.locationLongitude,
+        "destinationAddress": ref.read(dropOffLocationProvider)!.locationName,
+        "time": DateTime.now(),
+        "userEmail": auth.currentUser!.email.toString(),
+        "driverEmail": driverEmail
+      });
+    } catch (e) {
+      if (context.mounted) {
+        ErrorNotification().showError(context, "An Error Occurred $e");
+      }
+    }
+  }
+
+  void setDriverStatus(context, String driverEmail, String driverStatus) async {
+    try {
+      QuerySnapshot<Map<String, dynamic>> drivers = await db
+          .collection("Drivers")
+          .where("email", isEqualTo: driverEmail)
+          .get();
+
+      for (var driver in drivers.docs) {
+        driver.reference.update({"driverStatus": driverStatus});
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ErrorNotification().showError(context, "An Error Occurred $e");
+      }
     }
   }
 }

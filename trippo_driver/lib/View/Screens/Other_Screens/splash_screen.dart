@@ -52,14 +52,24 @@ class _SplashScreenState extends State<SplashScreen> {
             (permission2 == LocationPermission.whileInUse ||
                 permission2 == LocationPermission.always)) {
           initializeUser();
+        }else{
+           ErrorNotification().showError(context, "Location Access is required to run Trippo.");
+           await Future.delayed(const Duration(seconds:2 ));
+             SystemChannels.platform.invokeMethod("SystemNavigator.exitApplication");
         }
         return;
-      }
+      }else if (
+            permission == LocationPermission.whileInUse ||
+                permission == LocationPermission.always) {
+          initializeUser();
+          return;
+        }
       if (permission == LocationPermission.deniedForever ||
           permission == LocationPermission.unableToDetermine) {
         if (context.mounted) {
-          ErrorNotification().showError(context, "Cannot get you location");
-
+          ErrorNotification().showError(context,  "Location Access is required to run Trippo.");
+      await Future.delayed(const Duration(seconds:2 ));
+             SystemChannels.platform.invokeMethod("SystemNavigator.exitApplication");
         }
         return;
       }

@@ -6,6 +6,7 @@ import 'package:trippo_user/Model/predicted_places.dart';
 
 import '../../View/Screens/Main_Screens/Sub_Screens/where_to_screen.dart';
 import '../utils/error_notification.dart';
+
 /// [predictedPlacesRepoProvider] used to cache the [PredictedPlacesRepo] class to prevent it from creating multiple instances
 
 final predictedPlacesRepoProvider = Provider<PredictedPlacesRepo>((ref) {
@@ -13,10 +14,9 @@ final predictedPlacesRepoProvider = Provider<PredictedPlacesRepo>((ref) {
 });
 
 class PredictedPlacesRepo {
-
   /// [getAllPredictedPlaces] gets the details of the location by getting the string from [text] and fetching the
- /// data related to this [text] and showing them inside the [WhereTo] screen as user adds types more words new [autoComplete] items are added to the
- /// [ListView] in the [WhereTo] screen by adding the newly created list of [predictedPlacesList] to the provider [predictedPlacesProvider] located in the [WhereTo] Screen
+  /// data related to this [text] and showing them inside the [WhereTo] screen as user adds types more words new [autoComplete] items are added to the
+  /// [ListView] in the [WhereTo] screen by adding the newly created list of [predictedPlacesList] to the provider [predictedPlacesProvider] located in the [WhereTo] Screen
 
   void getAllPredictedPlaces(
       String text, BuildContext context, WidgetRef ref) async {
@@ -41,12 +41,13 @@ class PredictedPlacesRepo {
             .update((state) => predictedPlacesList);
       } else {
         if (context.mounted) {
-             ErrorNotification().showError(context,"Failed to get data");
-
+          ErrorNotification().showError(context, "Failed to get data");
         }
       }
     } catch (e) {
+      if (context.mounted) {
         ErrorNotification().showError(context, "An Error Occurred $e");
+      }
     }
   }
 }

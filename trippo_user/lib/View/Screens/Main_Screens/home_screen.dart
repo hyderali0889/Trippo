@@ -9,6 +9,7 @@ import 'package:trippo_user/Container/Repositories/address_parser_repo.dart';
 import 'package:location/location.dart' as loc;
 import 'package:geocoder2/geocoder2.dart';
 import 'package:trippo_user/Container/Repositories/firestore_repo.dart';
+import 'package:trippo_user/Container/utils/error_notification.dart';
 import 'package:trippo_user/Container/utils/keys.dart';
 import '../../../Container/Repositories/direction_polylines_repo.dart';
 import '../../../Container/utils/set_blackmap.dart';
@@ -24,6 +25,12 @@ final pickUpLocationProvider = StateProvider<Direction?>((ref) {
 });
 final dropOffLocationProvider = StateProvider<Direction?>((ref) {
   return null;
+});
+final selectedRideProvider = StateProvider<int>((ref) {
+  return 0;
+});
+final rateProvider = StateProvider<int>((ref) {
+  return 0;
 });
 
 final availableDriversProvider = StateProvider<List<DriverModel>>((ref) {
@@ -93,6 +100,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       getUserLoc();
                     },
                     onCameraMove: (CameraPosition pos) {
+                      if (ref.watch(dropOffLocationProvider) != null) {
+                        return;
+                      }
                       if (ref.watch(cameraMovementProvider) != pos.target) {
                         ref
                             .watch(cameraMovementProvider.notifier)
@@ -100,6 +110,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       }
                     },
                     onCameraIdle: () {
+                      if (ref.watch(dropOffLocationProvider) != null) {
+                        return;
+                      }
                       getAddressfromCordinates();
                     },
                   ),
@@ -242,6 +255,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       ),
                                     ),
                                     InkWell(
+                                      onTap: () {
+                                        requestARide(size);
+                                      },
                                       child: Container(
                                         alignment: Alignment.center,
                                         height: 50,
@@ -272,8 +288,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   // end of body
 
-
-
   void changePickUpLoc() async {
     try {
       ref.watch(dropOffLocationProvider.notifier).update((state) => null);
@@ -297,11 +311,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       controller!.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
           target: LatLng(pos.latitude, pos.longitude), zoom: 14)));
     } catch (e) {
-      ElegantNotification.error(
-          description: Text(
-        "An Error Occurred $e",
-        style: const TextStyle(color: Colors.black),
-      )).show(context);
+      if (context.mounted) {
+        ElegantNotification.error(
+            description: Text(
+          "An Error Occurred $e",
+          style: const TextStyle(color: Colors.black),
+        )).show(context);
+      }
     }
   }
 
@@ -321,14 +337,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             .humanReadableAddress(pos, context, ref);
       }
       if (context.mounted) {
-        ref.read(firestoreRepoProvider).getDriverData(context, ref,LatLng(pos.latitude, pos.longitude));
+        ref
+            .read(firestoreRepoProvider)
+            .getDriverData(context, ref, LatLng(pos.latitude, pos.longitude));
       }
     } catch (e) {
-      ElegantNotification.error(
-          description: Text(
-        "An Error Occurred $e",
-        style: const TextStyle(color: Colors.black),
-      )).show(context);
+      if (context.mounted) {
+        ElegantNotification.error(
+            description: Text(
+          "An Error Occurred $e",
+          style: const TextStyle(color: Colors.black),
+        )).show(context);
+      }
     }
   }
 
@@ -353,11 +373,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
       ref.read(pickUpLocationProvider.notifier).update((state) => model);
     } catch (e) {
-      ElegantNotification.error(
-          description: Text(
-        "An Error Occurred $e",
-        style: const TextStyle(color: Colors.black),
-      )).show(context);
+      if (context.mounted) {
+        ElegantNotification.error(
+            description: Text(
+          "An Error Occurred $e",
+          style: const TextStyle(color: Colors.black),
+        )).show(context);
+      }
     }
   }
 
@@ -428,11 +450,54 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             .update((state) => {...state, pickUpCircle, dropOffCircle});
       }
     } catch (e) {
-      ElegantNotification.error(
-          description: Text(
-        "An Error Occurred $e",
-        style: const TextStyle(color: Colors.black),
-      )).show(context);
+      if (context.mounted) {
+        ElegantNotification.error(
+            description: Text(
+          "An Error Occurred $e",
+          style: const TextStyle(color: Colors.black),
+        )).show(context);
+      }
     }
+  }
+
+  /// Request a Ride function
+
+  dynamic requestARide(size) {
+    if (ref.watch(dropOffLocationProvider) == null) {
+      ErrorNotification().showError(context, "Please add destination first");
+      return;
+    }
+    return showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return Container(
+            width: size.width,
+            height: 400,
+            decoration: const BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16.0),
+                    topRight: Radius.circular(16.0))),
+            child: ListView.builder(
+                itemCount: ref.read(availableDriversProvider).length,
+                itemBuilder: (context, index) {
+                  if (ref.read(availableDriversProvider).isEmpty) {
+                    return const Text("Loading...");
+                  }
+                  return InkWell(
+                    onTap: () {
+                      ref.read(firestoreRepoProvider).addUserRideRequestToDB(
+                          context,
+                          ref,
+                          ref.read(availableDriversProvider)[index].email);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Text(ref.read(availableDriversProvider)[index].email),
+                    ),
+                  );
+                }),
+          );
+        });
   }
 }

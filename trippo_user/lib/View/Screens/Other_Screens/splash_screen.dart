@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import '../../../Container/utils/error_notification.dart';
@@ -20,13 +21,10 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-   checkPermissions();
+    checkPermissions();
   }
 
-
-
   void initializeUser() async {
-
     final User? user = _auth.currentUser;
 
     if (user != null) {
@@ -43,7 +41,6 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
-
   /// [checkPermissions] checking the permission status
 
   void checkPermissions() async {
@@ -57,20 +54,37 @@ class _SplashScreenState extends State<SplashScreen> {
             (permission2 == LocationPermission.whileInUse ||
                 permission2 == LocationPermission.always)) {
           initializeUser();
+        } else {
+          if (context.mounted) {
+            ErrorNotification().showError(
+                context, "Location Access is required to run Trippo.");
+          }
+          await Future.delayed(const Duration(seconds: 2));
+          SystemChannels.platform
+              .invokeMethod("SystemNavigator.pop");
         }
         return;
+      } else if (permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always) {
+        initializeUser();
+        return;
       }
+
       if (permission == LocationPermission.deniedForever ||
           permission == LocationPermission.unableToDetermine) {
         if (context.mounted) {
-          ErrorNotification().showError(context, "Cannot get you location");
-
+          ErrorNotification()
+              .showError(context, "Location Access is required to run Trippo.");
+          await Future.delayed(const Duration(seconds: 2));
+          SystemChannels.platform
+              .invokeMethod("SystemNavigator.exitApplication");
         }
         return;
       }
     } catch (e) {
-       ErrorNotification().showError(context, "An Error Occurred $e");
-
+      if (context.mounted) {
+        ErrorNotification().showError(context, "An Error Occurred $e");
+      }
     }
   }
 

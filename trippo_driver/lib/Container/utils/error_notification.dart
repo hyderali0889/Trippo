@@ -14,6 +14,7 @@ class ErrorNotification{
   return  ElegantNotification.success(
               description:  Text(
             successText,
+               maxLines: 3,
             style: const TextStyle(color: Colors.black),
           )).show(context);
  }
