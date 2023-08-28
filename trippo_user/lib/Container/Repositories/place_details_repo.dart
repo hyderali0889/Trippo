@@ -1,16 +1,15 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:trippo_user/Container/utils/keys.dart';
-import 'package:trippo_user/View/Screens/Main_Screens/home_screen.dart';
+import 'package:trippo_user/View/Screens/Main_Screens/Home_Screen/home_providers.dart';
+import 'package:trippo_user/View/Screens/Main_Screens/Sub_Screens/Where_To_Screen/where_to_providers.dart';
 import '../../Model/direction_model.dart';
-import '../../View/Screens/Main_Screens/Sub_Screens/where_to_screen.dart';
 import '../utils/error_notification.dart';
 
 /// [placeDetailsRepoProvider] used to cache the [PlaceDetailsRepo] class to prevent it from creating multiple instances
 
-final placeDetailsRepoProvider = Provider<PlaceDetailsRepo>((ref) {
+final globalPlaceDetailsRepoProvider = Provider<PlaceDetailsRepo>((ref) {
   return PlaceDetailsRepo();
 });
 
@@ -37,14 +36,10 @@ class PlaceDetailsRepo {
         );
 
         ref
-            .read(dropOffLocationProvider.notifier)
+            .read(homeScreenDropOffLocationProvider.notifier)
             .update((state) => placeDetails);
 
         ref.read(whereToLoadingProvider.notifier).update((state) => false);
-
-        if (context.mounted) {
-          context.pop();
-        }
       } else {
         if (context.mounted) {
           ErrorNotification().showError(context, "Failed to get data");

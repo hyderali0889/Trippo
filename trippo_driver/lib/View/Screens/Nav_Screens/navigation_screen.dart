@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:trippo_driver/View/Screens/Main_Screens/history_screen.dart';
-import 'package:trippo_driver/View/Screens/Main_Screens/home_screen.dart';
-import 'package:trippo_driver/View/Screens/Main_Screens/payment_screen.dart';
-import 'package:trippo_driver/View/Screens/Main_Screens/profile_screen.dart';
+import 'package:trippo_driver/View/Screens/Main_Screens/History_Screen/history_screen.dart';
+import 'package:trippo_driver/View/Screens/Main_Screens/Home_Screen/home_screen.dart';
+import 'package:trippo_driver/View/Screens/Main_Screens/Payment_Screen/payment_screen.dart';
+import 'package:trippo_driver/View/Screens/Main_Screens/Profile_Screen/profile_screen.dart';
+import 'package:trippo_driver/View/Screens/Nav_Screens/navigation_providers.dart';
 
-final navigationstateProvider = StateProvider<int>((ref) {
-  return 0;
-});
+
 
 class NavigationScreen extends StatefulWidget {
   const NavigationScreen({super.key});
@@ -29,7 +28,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
     return Consumer(
       builder: (context, ref, child) {
         return Scaffold(
-          body: screens[ref.watch(navigationstateProvider)],
+          body: screens[ref.watch(navigationStateProvider)],
           bottomNavigationBar: NavigationBar(
             destinations: const [
               NavigationDestination(
@@ -55,12 +54,12 @@ class _NavigationScreenState extends State<NavigationScreen> {
             ],
             onDestinationSelected: (int selection) {
               ref
-                  .watch(navigationstateProvider.notifier)
+                  .watch(navigationStateProvider.notifier)
                   .update((state) => selection);
             },
             backgroundColor: Colors.black38,
             labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
-            selectedIndex: ref.watch(navigationstateProvider),
+            selectedIndex: ref.watch(navigationStateProvider),
           ),
         );
       },

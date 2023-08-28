@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-//import 'package:trippo_driver/Container/Repositories/firestore_repo.dart';
 import 'package:trippo_driver/View/Components/all_components.dart';
-import 'package:trippo_driver/View/Routes/routes.dart';
+import 'package:trippo_driver/View/Screens/Auth_Screens/Driver_config/driver_logics.dart';
+import 'package:trippo_driver/View/Screens/Auth_Screens/Driver_config/driver_providers.dart';
 
-import '../../../Container/Repositories/firestore_repo.dart';
-import '../../../Container/utils/error_notification.dart';
 
-final dropDownProvider = StateProvider.autoDispose<String?>((ref) => "SUV");
-final isLoadingProvider = StateProvider.autoDispose<bool>((ref) => false);
+
 
 class DriverConfigsScreen extends StatefulWidget {
   const DriverConfigsScreen({super.key});
@@ -66,10 +62,10 @@ class _DriverConfigsScreenState extends State<DriverConfigsScreen> {
                               child: SizedBox(
                                 width: size.width * 0.7,
                                 child: DropdownButton(
-                                  value: ref.watch(dropDownProvider),
+                                  value: ref.watch(driverConfigDropDownProvider),
                                   onChanged: (val) {
                                     ref
-                                        .watch(dropDownProvider.notifier)
+                                        .watch(driverConfigDropDownProvider.notifier)
                                         .update((state) => val);
                                   },
                                   dropdownColor: Colors.black45,
@@ -125,16 +121,16 @@ class _DriverConfigsScreenState extends State<DriverConfigsScreen> {
                             child: Consumer(
                               builder: (context, ref, child) {
                                 return InkWell(
-                                    onTap: ref.watch(isLoadingProvider)
+                                    onTap: ref.watch(driverConfigIsLoadingProvider)
                                         ? null
-                                        : () => sendDataToFirestore(ref),
+                                        : () => DriverLogics().sendDataToFirestore( context , ref , carNameController , plateNumController),
                                     child: Components().mainButton(
                                         size,
-                                        ref.watch(isLoadingProvider)
+                                        ref.watch(driverConfigIsLoadingProvider)
                                             ? "Loading ..."
                                             : "Submit Data",
                                         context,
-                                        ref.watch(isLoadingProvider)
+                                        ref.watch(driverConfigIsLoadingProvider)
                                             ? Colors.grey
                                             : Colors.blue));
                               },
@@ -153,27 +149,5 @@ class _DriverConfigsScreenState extends State<DriverConfigsScreen> {
     );
   }
 
-  void sendDataToFirestore(ref) async {
-    try {
-      if (carNameController.text.isEmpty || plateNumController.text.isEmpty) {
-          ErrorNotification().showError(context, "Please Enter Car Name and Plate Number");
 
-        return;
-      }
-      ref.watch(isLoadingProvider.notifier).update((state) => true);
-
-      ref.watch(firestoreRepoProvider).addDriversDataToFirestore(
-          context,
-          carNameController.text.trim(),
-          plateNumController.text.trim(),
-          ref.watch(dropDownProvider)!);
-
-      if (context.mounted) {
-        context.goNamed(Routes().navigationScreen);
-      }
-    } catch (e) {
-      ref.watch(isLoadingProvider.notifier).update((state) => false);
-          ErrorNotification().showError(context, "An Error Occurred $e");
-    }
-  }
 }

@@ -3,13 +3,13 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:trippo_driver/Container/utils/keys.dart';
-import 'package:trippo_driver/View/Screens/Main_Screens/home_screen.dart';
+import 'package:trippo_driver/View/Screens/Main_Screens/Home_Screen/home_providers.dart';
 import '../../Model/direction_model.dart';
 import '../utils/error_notification.dart';
 
 /// [addressParserProvider] used to cache the [AddressParser] class to prevent it from creating multiple instances
 
-final addressParserProvider = Provider<AddressParser>((ref) {
+final globalAddressParserProvider = Provider<AddressParser>((ref) {
   return AddressParser();
 });
 
@@ -30,7 +30,7 @@ class AddressParser {
             locationLatitude: userPosition.latitude,
             locationLongitude: userPosition.longitude,
             humanReadableAddress: res.data["results"][0]["formatted_address"]);
-        ref.read(driversLocationProvider.notifier).update((state) => model);
+        ref.read(homeScreenDriversLocationProvider.notifier).update((state) => model);
 
         return res.data["results"][0]["formatted_address"];
       } else {

@@ -5,11 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:trippo_user/Model/driver_model.dart';
-import 'package:trippo_user/View/Screens/Main_Screens/home_screen.dart';
+import 'package:trippo_user/View/Screens/Main_Screens/Home_Screen/home_providers.dart';
 
 import '../utils/error_notification.dart';
 
-final firestoreRepoProvider = Provider<FirestoreRepo>((ref) {
+final globalFirestoreRepoProvider = Provider<FirestoreRepo>((ref) {
   return FirestoreRepo();
 });
 
@@ -21,6 +21,7 @@ class FirestoreRepo {
       BuildContext context, WidgetRef ref, LatLng userPos) async {
     try {
       /// getting [DriverData] from [FirebaseFirestore]
+      print("called");
       QuerySnapshot<Map<String, dynamic>> drivers =
           await db.collection("Drivers").get();
 
@@ -41,7 +42,7 @@ class FirestoreRepo {
         }
 
         ref
-            .read(availableDriversProvider.notifier)
+            .read(homeScreenAvailableDriversProvider.notifier)
             .update((state) => [...state, model]);
       }
 
@@ -55,33 +56,27 @@ class FirestoreRepo {
 
       allDriversStream.listen((event) async {
         for (var driver in event) {
-          if (driver["driverStatus"] != "idle") {
-            return;
-          }
-          Marker marker = Marker(
+          if (driver["driverStatus"] == "Idle") {
+             Marker marker = Marker(
               markerId: MarkerId(driver["Car Name"]),
               infoWindow: InfoWindow(
                 title: driver["Car Name"],
               ),
               position: LatLng(driver["driverLoc"]["geopoint"].latitude,
                   driver["driverLoc"]["geopoint"].longitude),
-              icon: driver["Car Type"] == "Car"
-                  ? await BitmapDescriptor.fromAssetImage(
-                      const ImageConfiguration(),
-                      "assets/imgs/sedan.png",
-                    )
-                  : driver["Car Type"] == "MotorCycle"
-                      ? await BitmapDescriptor.fromAssetImage(
-                          const ImageConfiguration(),
-                          "assets/imgs/motorbike.png",
-                        )
-                      : await BitmapDescriptor.fromAssetImage(
-                          const ImageConfiguration(),
-                          "assets/imgs/suv.png",
-                        ));
+              icon: await BitmapDescriptor.fromAssetImage(
+                  const ImageConfiguration(),
+                  driver["Car Type"] == "Car"
+                      ? "assets/imgs/sedan.png"
+                      : driver["Car Type"] == "MotorCycle"
+                          ? "assets/imgs/motorbike.png"
+                          : "assets/imgs/suv.png"));
+
           ref
-              .read(mainMarkersProvider.notifier)
+              .read(homeScreenMainMarkersProvider.notifier)
               .update((state) => {...state, marker});
+          }
+
         }
       });
     } catch (e) {
@@ -95,12 +90,18 @@ class FirestoreRepo {
       context, WidgetRef ref, String driverEmail) async {
     try {
       await db.collection(auth.currentUser!.email.toString()).add({
-        "OriginLat": ref.read(pickUpLocationProvider)!.locationLatitude,
-        "OriginLng": ref.read(pickUpLocationProvider)!.locationLongitude,
-        "OriginAddress": ref.read(pickUpLocationProvider)!.locationName,
-        "destinationLat": ref.read(dropOffLocationProvider)!.locationLatitude,
-        "destinationLng": ref.read(dropOffLocationProvider)!.locationLongitude,
-        "destinationAddress": ref.read(dropOffLocationProvider)!.locationName,
+        "OriginLat":
+            ref.read(homeScreenPickUpLocationProvider)!.locationLatitude,
+        "OriginLng":
+            ref.read(homeScreenPickUpLocationProvider)!.locationLongitude,
+        "OriginAddress":
+            ref.read(homeScreenPickUpLocationProvider)!.locationName,
+        "destinationLat":
+            ref.read(homeScreenDropOffLocationProvider)!.locationLatitude,
+        "destinationLng":
+            ref.read(homeScreenDropOffLocationProvider)!.locationLongitude,
+        "destinationAddress":
+            ref.read(homeScreenDropOffLocationProvider)!.locationName,
         "time": DateTime.now(),
         "userEmail": auth.currentUser!.email.toString(),
         "driverEmail": driverEmail

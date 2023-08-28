@@ -3,13 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trippo_user/Container/utils/keys.dart';
 import 'package:trippo_user/Model/predicted_places.dart';
-
-import '../../View/Screens/Main_Screens/Sub_Screens/where_to_screen.dart';
+import 'package:trippo_user/View/Screens/Main_Screens/Sub_Screens/Where_To_Screen/where_to_providers.dart';
 import '../utils/error_notification.dart';
 
 /// [predictedPlacesRepoProvider] used to cache the [PredictedPlacesRepo] class to prevent it from creating multiple instances
 
-final predictedPlacesRepoProvider = Provider<PredictedPlacesRepo>((ref) {
+final globalPredictedPlacesRepoProvider = Provider<PredictedPlacesRepo>((ref) {
   return PredictedPlacesRepo();
 });
 
@@ -37,7 +36,7 @@ class PredictedPlacesRepo {
             .toList();
 
         ref
-            .read(predictedPlacesProvider.notifier)
+            .read(whereToPredictedPlacesProvider.notifier)
             .update((state) => predictedPlacesList);
       } else {
         if (context.mounted) {

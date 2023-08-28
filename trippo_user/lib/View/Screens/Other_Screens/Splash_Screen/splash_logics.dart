@@ -1,30 +1,16 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
-import '../../../Container/utils/error_notification.dart';
-import '../../Routes/routes.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:trippo_user/Container/utils/error_notification.dart';
+import 'package:trippo_user/View/Routes/routes.dart';
 
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
-
-  @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  @override
-  void initState() {
-    super.initState();
-    checkPermissions();
-  }
-
-  void initializeUser() async {
+class SplashLogics{
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+    void initializeUser(BuildContext context ) async {
     final User? user = _auth.currentUser;
 
     if (user != null) {
@@ -43,7 +29,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   /// [checkPermissions] checking the permission status
 
-  void checkPermissions() async {
+  void checkPermissions(BuildContext context) async {
     try {
       LocationPermission permission = await Geolocator.checkPermission();
 
@@ -53,7 +39,7 @@ class _SplashScreenState extends State<SplashScreen> {
         if (context.mounted &&
             (permission2 == LocationPermission.whileInUse ||
                 permission2 == LocationPermission.always)) {
-          initializeUser();
+          initializeUser(context);
         } else {
           if (context.mounted) {
             ErrorNotification().showError(
@@ -64,9 +50,9 @@ class _SplashScreenState extends State<SplashScreen> {
               .invokeMethod("SystemNavigator.pop");
         }
         return;
-      } else if (permission == LocationPermission.whileInUse ||
-          permission == LocationPermission.always) {
-        initializeUser();
+      } else if ( context.mounted &&( permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always)) {
+        initializeUser(context);
         return;
       }
 
@@ -77,7 +63,7 @@ class _SplashScreenState extends State<SplashScreen> {
               .showError(context, "Location Access is required to run Trippo.");
           await Future.delayed(const Duration(seconds: 2));
           SystemChannels.platform
-              .invokeMethod("SystemNavigator.exitApplication");
+              .invokeMethod("SystemNavigator.pop");
         }
         return;
       }
@@ -86,25 +72,5 @@ class _SplashScreenState extends State<SplashScreen> {
         ErrorNotification().showError(context, "An Error Occurred $e");
       }
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    Size size = MediaQuery.sizeOf(context);
-    return Scaffold(
-      body: SafeArea(
-          child: SizedBox(
-              width: size.width,
-              height: size.height,
-              child: Center(
-                child: Text(
-                  "Trippo",
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall!
-                      .copyWith(fontFamily: "bold", fontSize: 54),
-                ),
-              ))),
-    );
   }
 }

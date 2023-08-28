@@ -7,7 +7,7 @@ import 'package:trippo_driver/Model/driver_info_model.dart';
 
 import '../utils/error_notification.dart';
 
-final firestoreRepoProvider = Provider<AddFirestoreData>((ref) {
+final globalFirestoreRepoProvider = Provider<AddFirestoreData>((ref) {
   return AddFirestoreData();
 });
 
@@ -29,7 +29,10 @@ class AddFirestoreData {
         "Car Type": carType
       });
     } catch (e) {
+      if(context.mounted){
+
       ErrorNotification().showError(context, "An Error Occurred $e");
+      }
     }
   }
 
@@ -50,7 +53,10 @@ class AddFirestoreData {
 
       print("data is ${driver.carType}");
     } catch (e) {
-       ErrorNotification().showError(context, "An Error Occurred $e");
+      if(context.mounted){
+
+      ErrorNotification().showError(context, "An Error Occurred $e");
+      }
     }
   }
 
@@ -61,7 +67,10 @@ class AddFirestoreData {
           .doc(auth.currentUser!.email.toString())
           .update({"driverStatus": status});
     } catch (e) {
-    ErrorNotification().showError(context, "An Error Occurred $e");
+   if(context.mounted){
+
+      ErrorNotification().showError(context, "An Error Occurred $e");
+      }
     }
   }
   void setDriverLocationStatus(BuildContext context, GeoFirePoint? loc) async {
@@ -71,7 +80,10 @@ class AddFirestoreData {
           .doc(auth.currentUser!.email.toString())
           .update({"driverLoc": loc?.data});
     } catch (e) {
+     if(context.mounted){
+
       ErrorNotification().showError(context, "An Error Occurred $e");
+      }
     }
   }
 }

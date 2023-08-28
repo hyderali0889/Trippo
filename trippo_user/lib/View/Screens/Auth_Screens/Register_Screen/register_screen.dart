@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:trippo_driver/Container/Repositories/auth_repo.dart';
-
-import '../../../Container/utils/error_notification.dart';
-import '../../Components/all_components.dart';
-import '../../Routes/routes.dart';
-
-final isLoadingProvider = StateProvider.autoDispose<bool>((ref) => false);
+import 'package:trippo_user/View/Screens/Auth_Screens/Register_Screen/register_logics.dart';
+import 'package:trippo_user/View/Screens/Auth_Screens/Register_Screen/register_providers.dart';
+import '../../../Components/all_components.dart';
+import '../../../Routes/routes.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -91,58 +88,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               child: Consumer(
                                 builder: (context, ref, child) {
                                   return InkWell(
-                                      onTap: ref.watch(isLoadingProvider)
-                                          ? null
-                                          : () async {
-                                              try {
-                                                if (nameController
-                                                        .text.isEmpty ||
-                                                    emailController
-                                                        .text.isEmpty ||
-                                                    passwordController
-                                                        .text.isEmpty) {
-                                                            ErrorNotification().showError(context,  "Please Enter Email and Password");
-
-                                                  return;
-                                                }
-
-                                                ref
-                                                    .watch(isLoadingProvider
-                                                        .notifier)
-                                                    .update((state) => true);
-                                                ref
-                                                    .watch(authRepoProvider)
-                                                    .registerUser(
-                                                        emailController.text
-                                                            .trim(),
-                                                        passwordController.text
-                                                            .trim(),
-                                                        context);
-
-                                                ref
-                                                    .watch(isLoadingProvider
-                                                        .notifier)
-                                                    .update((state) => false);
-
-                                                if (context.mounted) {
-                                                  context.goNamed(
-                                                      Routes().driverConfig);
-                                                }
-                                              } catch (e) {
-                                                ref
-                                                    .watch(isLoadingProvider
-                                                        .notifier)
-                                                    .update((state) => false);
-                                                 ErrorNotification().showError(context, "An Error Occurred $e");
-                                              }
-                                            },
+                                      onTap:
+                                          ref.watch(registerIsLoadingProvider)
+                                              ? null
+                                              : () =>RegisterLogics().registerUser(context ,ref , nameController , emailController , passwordController),
                                       child: Components().mainButton(
                                           size,
-                                          ref.watch(isLoadingProvider)
+                                          ref.watch(registerIsLoadingProvider)
                                               ? "Loading ..."
                                               : "Register",
                                           context,
-                                          ref.watch(isLoadingProvider)
+                                          ref.watch(registerIsLoadingProvider)
                                               ? Colors.grey
                                               : Colors.blue));
                                 },
@@ -173,4 +129,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       )),
     );
   }
+
+
 }

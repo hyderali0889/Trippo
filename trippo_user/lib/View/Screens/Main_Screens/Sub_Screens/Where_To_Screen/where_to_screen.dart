@@ -1,19 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:trippo_user/Container/Repositories/place_details_repo.dart';
-import 'package:trippo_user/Model/predicted_places.dart';
-import '../../../../Container/Repositories/predicted_places_repo.dart';
-import '../../../../Container/utils/error_notification.dart';
+import 'package:trippo_user/Container/Repositories/predicted_places_repo.dart';
+import 'package:trippo_user/View/Screens/Main_Screens/Sub_Screens/Where_To_Screen/where_to_logics.dart';
 
-final predictedPlacesProvider =
-    StateProvider.autoDispose<List<PredictedPlaces>?>((ref) {
-  return null;
-});
-
-final whereToLoadingProvider = StateProvider.autoDispose<bool>((ref) {
-  return false;
-});
+import 'where_to_providers.dart';
 
 class WhereToScreen extends StatefulWidget {
   const WhereToScreen({super.key, required this.controller});
@@ -26,6 +17,14 @@ class WhereToScreen extends StatefulWidget {
 
 class _WhereToScreenState extends State<WhereToScreen> {
   final TextEditingController whereToController = TextEditingController();
+
+  late NavigatorState _navigator;
+
+  @override
+  void didChangeDependencies() {
+    _navigator = Navigator.of(context);
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,11 +58,11 @@ class _WhereToScreenState extends State<WhereToScreen> {
                       onChanged: (e) {
                         if (e.length < 2) {
                           ref
-                              .watch(predictedPlacesProvider.notifier)
+                              .watch(whereToPredictedPlacesProvider.notifier)
                               .update((state) => null);
                         }
                         ref
-                            .watch(predictedPlacesRepoProvider)
+                            .watch(globalPredictedPlacesRepoProvider)
                             .getAllPredictedPlaces(e, context, ref);
                       },
                       controller: whereToController,
@@ -90,7 +89,7 @@ class _WhereToScreenState extends State<WhereToScreen> {
                     ),
                   ),
                   Expanded(
-                    child: ref.watch(predictedPlacesProvider) == null
+                    child: ref.watch(whereToPredictedPlacesProvider) == null
                         ? Container(
                             alignment: Alignment.center,
                             child: const Text(
@@ -104,7 +103,7 @@ class _WhereToScreenState extends State<WhereToScreen> {
                                   )
                                 : ListView.separated(
                                     itemCount: ref
-                                        .watch(predictedPlacesProvider)!
+                                        .watch(whereToPredictedPlacesProvider)!
                                         .length,
                                     separatorBuilder: (context, index) {
                                       return const Divider(
@@ -114,13 +113,25 @@ class _WhereToScreenState extends State<WhereToScreen> {
                                     },
                                     itemBuilder: (context, index) {
                                       return InkWell(
-                                        onTap: () =>
-                                            setDropOffLocation(ref, index),
+                                        onTap: () async {
+                                          try {
+                                            await WhereToLogics()
+                                                .setDropOffLocation(
+                                                    context,
+                                                    ref,
+                                                    widget.controller,
+                                                    index);
+
+                                            _navigator.pop();
+                                          } catch (e) {
+                                            print(e);
+                                          }
+                                        },
                                         child: Padding(
                                           padding: const EdgeInsets.all(15.0),
                                           child: Text(
                                             ref
-                                                    .watch(predictedPlacesProvider)![
+                                                    .watch(whereToPredictedPlacesProvider)![
                                                         index]
                                                     .mainText ??
                                                 "Loading ...",
@@ -138,22 +149,5 @@ class _WhereToScreenState extends State<WhereToScreen> {
         ),
       )),
     );
-  }
-
-  /// user gets the [String] human readable address from the selected item from the [ListView] and the new data is
-  /// shown on the screen as user types anything new in the text fiels
-
-  void setDropOffLocation(WidgetRef ref, int index) async {
-    try {
-      await ref.read(placeDetailsRepoProvider).getAllPredictedPlaceDetails(
-          ref.read(predictedPlacesProvider)![index].placeId!,
-          context,
-          ref,
-          widget.controller);
-    } catch (e) {
-      if (context.mounted) {
-        ErrorNotification().showError(context, "An Error Occurred $e");
-      }
-    }
   }
 }

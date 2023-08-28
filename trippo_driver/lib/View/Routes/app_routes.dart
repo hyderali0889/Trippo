@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:trippo_driver/View/Routes/routes.dart';
-import 'package:trippo_driver/View/Screens/Auth_Screens/login_screen.dart';
-import 'package:trippo_driver/View/Screens/Auth_Screens/register_screen.dart';
+import 'package:trippo_driver/View/Screens/Auth_Screens/Driver_config/driver_config.dart';
+import 'package:trippo_driver/View/Screens/Auth_Screens/Login_Screen/login_screen.dart';
+import 'package:trippo_driver/View/Screens/Auth_Screens/Register_Screen/register_screen.dart';
 import 'package:trippo_driver/View/Screens/Nav_Screens/navigation_screen.dart';
-import 'package:trippo_driver/View/Screens/Other_Screens/splash_screen.dart';
+import 'package:trippo_driver/View/Screens/Other_Screens/Splash_Screen/splash_screen.dart';
 
-import '../Screens/Auth_Screens/driver_config.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');

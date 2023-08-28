@@ -8,7 +8,7 @@ import '../utils/error_notification.dart';
 
 /// [authRepoProvider] used to cache the [AuthRepo] class to prevent it from creating multiple instances
 
-final authRepoProvider = Provider<AuthRepo>((ref) {
+final globalAuthRepoProvider = Provider<AuthRepo>((ref) {
   return AuthRepo();
 });
 

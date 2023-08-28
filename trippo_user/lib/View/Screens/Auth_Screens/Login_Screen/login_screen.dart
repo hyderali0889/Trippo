@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:trippo_user/Container/Repositories/auth_repo.dart';
 import 'package:trippo_user/View/Components/all_components.dart';
-
-import '../../../Container/utils/error_notification.dart';
-import '../../Routes/routes.dart';
+import 'package:trippo_user/View/Screens/Auth_Screens/Login_Screen/login_logics.dart';
+import 'package:trippo_user/View/Screens/Auth_Screens/Login_Screen/login_providers.dart';
+import '../../../Routes/routes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-final isLoadingProvider = StateProvider.autoDispose<bool>((ref) => false);
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -82,53 +79,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                 padding: const EdgeInsets.only(top: 20.0),
                                 child: Consumer(builder: (context, ref, child) {
                                   return InkWell(
-                                      onTap: ref.watch(isLoadingProvider)
+                                      onTap: ref.watch(loginIsLoadingProvider)
                                           ? null
-                                          : () async {
-                                              try {
-                                                if (emailController
-                                                        .text.isEmpty ||
-                                                    passwordController
-                                                        .text.isEmpty) {
-                                                             ErrorNotification().showError(context,  "Please Enter Email and Password");
-
-                                                  return;
-                                                }
-                                                ref
-                                                    .watch(isLoadingProvider
-                                                        .notifier)
-                                                    .update((state) => true);
-                                                ref
-                                                    .watch(authRepoProvider)
-                                                    .loginUser(
-                                                        emailController.text
-                                                            .trim(),
-                                                        passwordController.text
-                                                            .trim(),
-                                                        context);
-
-                                                ref
-                                                    .watch(isLoadingProvider
-                                                        .notifier)
-                                                    .update((state) => false);
-
-
-                                              } catch (e) {
-                                                ref
-                                                    .watch(isLoadingProvider
-                                                        .notifier)
-                                                    .update((state) => false);
-                                                        ErrorNotification().showError(context,    "An Error Occurred $e");
-
-                                              }
-                                            },
+                                          : () => LoginLogics().loginUser(context,ref ,emailController , passwordController ),
                                       child: Components().mainButton(
                                           size,
-                                          ref.watch(isLoadingProvider)
+                                          ref.watch(loginIsLoadingProvider)
                                               ? "Loading ..."
                                               : "Login",
                                           context,
-                                          ref.watch(isLoadingProvider)
+                                          ref.watch(loginIsLoadingProvider)
                                               ? Colors.grey
                                               : Colors.blue));
                                 })),
@@ -157,4 +117,6 @@ class _LoginScreenState extends State<LoginScreen> {
       )),
     );
   }
+
+
 }
