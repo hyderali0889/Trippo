@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoder2/geocoder2.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lottie/lottie.dart' as lottie;
 import 'package:trippo_user/Container/Repositories/address_parser_repo.dart';
@@ -205,7 +206,7 @@ class HomeScreenLogics {
       lon2,
     );
 
-    return calculatedDistance / 1000;
+    return calculatedDistance;
   }
 
   dynamic requestARide(size, BuildContext context, WidgetRef ref,
@@ -273,15 +274,23 @@ class HomeScreenLogics {
                                                   homeScreenPickUpLocationProvider)!
                                               .locationLongitude,
                                           ref
-                                              .read(homeScreenAvailableDriversProvider)[
+                                              .watch(homeScreenAvailableDriversProvider)[
                                                   index]
                                               .driverLoc
                                               .latitude,
                                           ref
-                                              .read(homeScreenAvailableDriversProvider)[
+                                              .watch(homeScreenAvailableDriversProvider)[
                                                   index]
                                               .driverLoc
                                               .longitude);
+                                      print(
+                                          "The updated distance is $distanceToDriver");
+
+                                      if (distanceToDriver < 50 && index == ref.watch(homeScreenSelectedRideProvider) && ref.watch(homeScreenStartDriverSearch) ) {
+                                        context.pop();
+                                        sendNotificationToUserAboutDriverArrival(
+                                            context);
+                                      }
 
                                       double carType = ref
                                                   .read(homeScreenAvailableDriversProvider)[
@@ -299,9 +308,9 @@ class HomeScreenLogics {
                                       String userFare = ref.read(
                                                   homeScreenRateProvider) !=
                                               null
-                                          ? ((ref.read(homeScreenRateProvider)! *
+                                          ? (((ref.read(homeScreenRateProvider)! *
                                                       carType) *
-                                                  5)
+                                                  5))
                                               .toString()
                                           : "Loading...";
 
@@ -329,6 +338,8 @@ class HomeScreenLogics {
                                                     homeScreenSelectedRideProvider
                                                         .notifier)
                                                 .update((state) => index);
+
+
                                           },
                                           child: Padding(
                                             padding: const EdgeInsets.all(15.0),
@@ -368,7 +379,7 @@ class HomeScreenLogics {
                                                                 index]
                                                             .carName),
                                                         Text(
-                                                          "${distanceToDriver.toStringAsFixed(0)} KM away.",
+                                                          "${(distanceToDriver / 1000).toStringAsFixed(0)} KM away.",
                                                           style:
                                                               Theme.of(context)
                                                                   .textTheme
@@ -405,21 +416,26 @@ class HomeScreenLogics {
                                     }),
                               ),
                               InkWell(
-                                onTap:
-                                    ref.watch(homeScreenSelectedRideProvider) ==
-                                            null
-                                        ? null
-                                        : () {
-                                            ref
-                                                .read(
-                                                    homeScreenStartDriverSearch
-                                                        .notifier)
-                                                .update((state) => true);
+                                onTap: ref.watch(
+                                            homeScreenSelectedRideProvider) ==
+                                        null
+                                    ? null
+                                    : () {
+                                      int seletectedDriver = int.parse(ref.read(
+                                            homeScreenSelectedRideProvider).toString());
+                                        ref
+                                            .read(homeScreenStartDriverSearch
+                                                .notifier)
+                                            .update((state) => true);
 
-                                            sendNotificationToDriver(
-                                              context, ref
-                                            );
-                                          },
+                                             ref
+                                                .read(
+                                                    globalFirestoreRepoProvider)
+                                                .addUserRideRequestToDB(
+                                                    context, ref, ref.read(homeScreenAvailableDriversProvider)[seletectedDriver].email);
+
+                                        sendNotificationToDriver(context, ref);
+                                      },
                                 child: Components().mainButton(
                                     size,
                                     "Submit",
@@ -448,18 +464,43 @@ class HomeScreenLogics {
       await Dio().post("https://fcm.googleapis.com/fcm/send",
           options: Options(headers: {
             HttpHeaders.contentTypeHeader: "application/json",
-            HttpHeaders.authorizationHeader : "Bearer AAAA7vDmw2Y:APA91bH44PYH1e9Idr_iOA76pQmowxa5nFZsEJ3CoxjUeAi4B9L-3GAezzskpynDU-wHYo144fCpbglxLdP6jJZUIHjKA-Q3gDiffy3OK-bWrDw7mQh2FeEwAWxEX1G4Ey_7MEkDanXs"
+            HttpHeaders.authorizationHeader:
+                "Bearer AAAA7vDmw2Y:APA91bH44PYH1e9Idr_iOA76pQmowxa5nFZsEJ3CoxjUeAi4B9L-3GAezzskpynDU-wHYo144fCpbglxLdP6jJZUIHjKA-Q3gDiffy3OK-bWrDw7mQh2FeEwAWxEX1G4Ey_7MEkDanXs"
           }),
           data: {
-            "data": {
-              "screen" : "/navigationScreen"
-            },
+            "data": {"screen": "/navigationScreen"},
             "notification": {
               "title": "Customer Alert",
-              "body": "A Customer is requesting driver at ${ref.read(homeScreenPickUpLocationProvider)!.locationName.toString()} heading towards ${ref.read(homeScreenDropOffLocationProvider)!.locationName.toString()}"
+              "body":
+                  "A Customer is requesting driver at ${ref.read(homeScreenPickUpLocationProvider)!.locationName.toString()} heading towards ${ref.read(homeScreenDropOffLocationProvider)!.locationName.toString()}"
             },
             "to":
                 "dfPljtkfTo-uhP_KKpTKtR:APA91bGymnaMAIedOXIhSAD4gnPRU5EOfp_4pdpoM6HIbz_8L4MMCXQVpc6sfMoAPv44sLRaAjsOmqm8t7x9pk0wV27V1GhlUwDm_OP7kEIqq_VhyRKqWPaVgIOzhHsGhSkiJAsh5pC7"
+          });
+    } catch (e) {
+      if (context.mounted) {
+        ErrorNotification().showError(context, "$e");
+      }
+    }
+  }
+
+  Future<dynamic> sendNotificationToUserAboutDriverArrival(
+      BuildContext context) async {
+    try {
+      await Dio().post("https://fcm.googleapis.com/fcm/send",
+          options: Options(headers: {
+            HttpHeaders.contentTypeHeader: "application/json",
+            HttpHeaders.authorizationHeader:
+                "Bearer AAAA7vDmw2Y:APA91bH44PYH1e9Idr_iOA76pQmowxa5nFZsEJ3CoxjUeAi4B9L-3GAezzskpynDU-wHYo144fCpbglxLdP6jJZUIHjKA-Q3gDiffy3OK-bWrDw7mQh2FeEwAWxEX1G4Ey_7MEkDanXs"
+          }),
+          data: {
+            "data": {"screen": "/home"},
+            "notification": {
+              "title": "Driver is here",
+              "body": "Be ready the Driver is just arround the corner"
+            },
+            "to":
+                "eHeH0bV9QbSMvINPFDoo9k:APA91bHrFlYWx5cnoV4cvzwLDrzG_1EYKFAzU0M0CPQyw983SubqiWALhiAVxHntXnaAiUKNPCTfXdK_Ws9LDgc9aJUT_5jvOe9CznTUMxDVFbX4YE7Iu75OMcIj4PTHLiQP0iRgCcm4"
           });
     } catch (e) {
       if (context.mounted) {

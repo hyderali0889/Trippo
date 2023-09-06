@@ -1,9 +1,11 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:go_router/go_router.dart';
 import 'package:trippo_driver/Container/utils/error_notification.dart';
 import 'package:trippo_driver/View/Screens/Main_Screens/Home_Screen/home_logics.dart';
+
 
 class MessagingService {
   static String? fcmToken; // Variable to store the FCM token
@@ -36,22 +38,27 @@ class MessagingService {
       fcmToken = await _fcm.getToken();
       print('fcmToken: $fcmToken');
 
+
+      const AndroidNotificationChannel channel = AndroidNotificationChannel(
+  'high_importance_channel', // id
+  'Trippo (Driver)', // title // description
+  importance: Importance.max,
+);
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+await flutterLocalNotificationsPlugin
+  .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+  ?.createNotificationChannel(channel);
+
       // Handling background messages using the specified handler
       FirebaseMessaging.onBackgroundMessage(
           _firebaseMessagingBackgroundHandler);
 
-      // Listening for incoming messages while the app is in the foreground
-      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        debugPrint('Got a message whilst in the foreground!');
-        debugPrint('Message data: ${message.notification!.title.toString()}');
 
-        if (message.notification != null) {
-          if (message.notification!.title != null &&
-              message.notification!.body != null) {
-            final notificationData = message.data;
-
-            // Showing an alert dialog when a notification is received (Foreground state)
-            showDialog(
+     void showNotDialog(message , notificationData){
+  showDialog(
               context: context,
               barrierDismissible: false,
               builder: (BuildContext context) {
@@ -72,6 +79,8 @@ class MessagingService {
                           onPressed: () {
                             HomeLogics()
                                 .sendNotificationToUser(context, "accepted");
+
+                                
                           },
                           child: const Text('Accept request'),
                         ),
@@ -88,6 +97,19 @@ class MessagingService {
                 );
               },
             );
+     }
+
+      // Listening for incoming messages while the app is in the foreground
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+
+
+        if (message.notification != null) {
+          if (message.notification!.title != null &&
+              message.notification!.body != null) {
+            final notificationData = message.data;
+showNotDialog(message ,notificationData );
+            // Showing an alert dialog when a notification is received (Foreground state)
+
           }
         }
       });
@@ -100,6 +122,8 @@ class MessagingService {
         if (notificationData.containsKey('screen')) {
           final screen = notificationData['screen'];
           context.goNamed(screen);
+
+          showNotDialog(message ,notificationData );
         }
       }
 
@@ -114,8 +138,7 @@ class MessagingService {
 
       // Handling a notification click event when the app is in the background
       FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-        debugPrint(
-            'onMessageOpenedApp: ${message.notification!.title.toString()}');
+
         handleNotificationClick(context, message);
       });
     } catch (e) {

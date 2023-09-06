@@ -28,7 +28,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
 
     super.initState();
-    MessagingService().init(context);
+    MessagingService().init(context , ref);
   }
 
   @override

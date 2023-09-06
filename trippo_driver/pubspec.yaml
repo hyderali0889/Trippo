@@ -48,6 +48,7 @@ dependencies:
   flutter_polyline_points: ^1.0.0
   geoflutterfire2: ^2.3.15
   firebase_messaging: ^14.6.7
+  flutter_local_notifications: ^15.1.1
 
 dev_dependencies:
   flutter_test:

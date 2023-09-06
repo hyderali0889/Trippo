@@ -118,10 +118,12 @@ class HomeLogics {
             HttpHeaders.authorizationHeader:
                 "Bearer AAAA7vDmw2Y:APA91bH44PYH1e9Idr_iOA76pQmowxa5nFZsEJ3CoxjUeAi4B9L-3GAezzskpynDU-wHYo144fCpbglxLdP6jJZUIHjKA-Q3gDiffy3OK-bWrDw7mQh2FeEwAWxEX1G4Ey_7MEkDanXs"
           }),
+
           data: {
-            "data": {"screen": "/home"},
+            "data": {"screen": "home"},
             "notification": {
               "title": "Driver's Response",
+              "status" : driverRes,
               "body":
                   " The Driver has $driverRes your request. ${driverRes == "accepted" ? "The Driver will be arriving soon." : "Sorry! The Driver is not available."}"
             },

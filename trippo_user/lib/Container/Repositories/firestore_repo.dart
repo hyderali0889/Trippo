@@ -21,30 +21,32 @@ class FirestoreRepo {
       BuildContext context, WidgetRef ref, LatLng userPos) async {
     try {
       /// getting [DriverData] from [FirebaseFirestore]
-      print("called");
-      QuerySnapshot<Map<String, dynamic>> drivers =
-          await db.collection("Drivers").get();
 
-      for (var driver in drivers.docs) {
-        DriverModel model = DriverModel(
-            driver.data()["Car Name"],
-            driver.data()["Car Plate Num"],
-            driver.data()["Car Type"],
-            geo.point(
-                latitude: driver.data()["driverLoc"]["geopoint"].latitude,
-                longitude: driver.data()["driverLoc"]["geopoint"].longitude),
-            driver.data()["driverStatus"],
-            driver.data()["email"],
-            driver.data()["name"]);
+      Stream<QuerySnapshot<Map<String, dynamic>>> drivers =
+          db.collection("Drivers").snapshots();
 
-        if (driver.data()["driverStatus"] == "offline") {
-          return;
+      drivers.listen((event) {
+        for (var driver in event.docs) {
+          DriverModel model = DriverModel(
+              driver.data()["Car Name"],
+              driver.data()["Car Plate Num"],
+              driver.data()["Car Type"],
+              geo.point(
+                  latitude: driver.data()["driverLoc"]["geopoint"].latitude,
+                  longitude: driver.data()["driverLoc"]["geopoint"].longitude),
+              driver.data()["driverStatus"],
+              driver.data()["email"],
+              driver.data()["name"]);
+
+          if (driver.data()["driverStatus"] == "offline") {
+            return;
+          }
+
+          ref
+              .read(homeScreenAvailableDriversProvider.notifier)
+              .update((state) => [...state, model]);
         }
-
-        ref
-            .read(homeScreenAvailableDriversProvider.notifier)
-            .update((state) => [...state, model]);
-      }
+      });
 
       GeoFirePoint center =
           geo.point(latitude: userPos.latitude, longitude: userPos.longitude);
@@ -57,26 +59,25 @@ class FirestoreRepo {
       allDriversStream.listen((event) async {
         for (var driver in event) {
           if (driver["driverStatus"] == "Idle") {
-             Marker marker = Marker(
-              markerId: MarkerId(driver["Car Name"]),
-              infoWindow: InfoWindow(
-                title: driver["Car Name"],
-              ),
-              position: LatLng(driver["driverLoc"]["geopoint"].latitude,
-                  driver["driverLoc"]["geopoint"].longitude),
-              icon: await BitmapDescriptor.fromAssetImage(
-                  const ImageConfiguration(),
-                  driver["Car Type"] == "Car"
-                      ? "assets/imgs/sedan.png"
-                      : driver["Car Type"] == "MotorCycle"
-                          ? "assets/imgs/motorbike.png"
-                          : "assets/imgs/suv.png"));
+            Marker marker = Marker(
+                markerId: MarkerId(driver["Car Name"]),
+                infoWindow: InfoWindow(
+                  title: driver["Car Name"],
+                ),
+                position: LatLng(driver["driverLoc"]["geopoint"].latitude,
+                    driver["driverLoc"]["geopoint"].longitude),
+                icon: await BitmapDescriptor.fromAssetImage(
+                    const ImageConfiguration(),
+                    driver["Car Type"] == "Car"
+                        ? "assets/imgs/sedan.png"
+                        : driver["Car Type"] == "MotorCycle"
+                            ? "assets/imgs/motorbike.png"
+                            : "assets/imgs/suv.png"));
 
-          ref
-              .read(homeScreenMainMarkersProvider.notifier)
-              .update((state) => {...state, marker});
+            ref
+                .read(homeScreenMainMarkersProvider.notifier)
+                .update((state) => {...state, marker});
           }
-
         }
       });
     } catch (e) {
@@ -106,6 +107,20 @@ class FirestoreRepo {
         "userEmail": auth.currentUser!.email.toString(),
         "driverEmail": driverEmail
       });
+    } catch (e) {
+      if (context.mounted) {
+        ErrorNotification().showError(context, "An Error Occurred $e");
+      }
+    }
+  }
+
+  void nullifyUserRides(context) async {
+    try {
+      var data = await db.collection(auth.currentUser!.email.toString()).get();
+
+      for (var alldata in data.docs) {
+        alldata.reference.delete();
+      }
     } catch (e) {
       if (context.mounted) {
         ErrorNotification().showError(context, "An Error Occurred $e");
