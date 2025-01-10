@@ -134,17 +134,6 @@ Make sure your Android or iOS environment is set up correctly.
 - **Real-time Ride Tracking**: Monitor ongoing rides.
 - **Analytics**: Generate reports on the total number of rides, earnings, and active users.
 
-## Screenshots
-
-### Rider App
-![Rider App Screenshot](screenshots/rider-app.png)
-
-### Driver App
-![Driver App Screenshot](screenshots/driver-app.png)
-
-### Admin Dashboard
-![Admin Dashboard Screenshot](screenshots/admin-dashboard.png)
-
 ## Contributing
 
 We welcome contributions to improve **Trippo**. If you'd like to contribute:
@@ -158,10 +147,6 @@ We welcome contributions to improve **Trippo**. If you'd like to contribute:
 ## License
 
 **Trippo** is open-source and available under the [MIT License](LICENSE).
-
-## Contact
-
-If you have any questions, feel free to open an issue or contact us at [your-email@example.com].
 
 ---
 
