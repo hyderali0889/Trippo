@@ -1,4 +1,3 @@
-```
 # Trippo - Uber Clone App (Flutter + Firebase)
 
 ## Overview
